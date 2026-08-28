@@ -2,8 +2,66 @@
 @tailwind components;
 @tailwind utilities;
 
+/* =============================================================================
+   Jetons de couleur.
+   Le theme clair est defini sur :root, le theme sombre sur .dark : la classe
+   est posee sur <html> par le bouton de bascule (voir ThemeToggle).
+   ========================================================================== */
+
 :root {
+  color-scheme: light;
+
+  --canvas: #f4f6fb;
+  --fg: #0b1024;
+  --muted: #475569;
+  --faint: #64748b;
+
+  --surface: rgba(255, 255, 255, 0.82);
+  --surface-hover: rgba(255, 255, 255, 0.98);
+  --surface-soft: rgba(255, 255, 255, 0.5);
+  --chip: rgba(15, 23, 42, 0.07);
+
+  --line: rgba(15, 23, 42, 0.12);
+  --line-strong: rgba(15, 23, 42, 0.22);
+
+  --accent: #a3700f;
+  --accent-soft: rgba(217, 151, 26, 0.16);
+  --accent-line: rgba(217, 151, 26, 0.5);
+
+  --shine-mid: #0b1024;
+  --field-bg: rgba(255, 255, 255, 0.9);
+
+  --glow-gold: rgba(217, 151, 26, 0.16);
+  --glow-brand: rgba(18, 166, 149, 0.14);
+  --glow-violet: rgba(139, 124, 246, 0.14);
+}
+
+.dark {
   color-scheme: dark;
+
+  --canvas: #070b18;
+  --fg: #f1f5f9;
+  --muted: #94a3b8;
+  --faint: #64748b;
+
+  --surface: rgba(255, 255, 255, 0.04);
+  --surface-hover: rgba(255, 255, 255, 0.08);
+  --surface-soft: rgba(255, 255, 255, 0.02);
+  --chip: rgba(255, 255, 255, 0.1);
+
+  --line: rgba(255, 255, 255, 0.12);
+  --line-strong: rgba(255, 255, 255, 0.26);
+
+  --accent: #ffd166;
+  --accent-soft: rgba(255, 209, 102, 0.14);
+  --accent-line: rgba(255, 209, 102, 0.42);
+
+  --shine-mid: #ffffff;
+  --field-bg: rgba(11, 16, 36, 0.7);
+
+  --glow-gold: rgba(244, 185, 62, 0.16);
+  --glow-brand: rgba(34, 200, 176, 0.14);
+  --glow-violet: rgba(139, 124, 246, 0.14);
 }
 
 html,
@@ -12,17 +70,18 @@ body {
 }
 
 body {
-  @apply bg-ink-950 text-slate-100 antialiased;
+  @apply bg-canvas text-fg antialiased;
   background-image:
-    radial-gradient(60rem 40rem at 12% -10%, rgba(244, 185, 62, 0.16), transparent 60%),
-    radial-gradient(50rem 34rem at 92% 4%, rgba(34, 200, 176, 0.14), transparent 62%),
-    radial-gradient(46rem 30rem at 50% 108%, rgba(139, 124, 246, 0.14), transparent 60%);
+    radial-gradient(60rem 40rem at 12% -10%, var(--glow-gold), transparent 60%),
+    radial-gradient(50rem 34rem at 92% 4%, var(--glow-brand), transparent 62%),
+    radial-gradient(46rem 30rem at 50% 108%, var(--glow-violet), transparent 60%);
   background-attachment: fixed;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 @layer components {
   .card {
-    @apply rounded-2xl border border-white/10 bg-white/[0.04] backdrop-blur-sm shadow-xl shadow-black/30;
+    @apply rounded-2xl border border-line bg-surface backdrop-blur-sm shadow-xl shadow-black/10 dark:shadow-black/30;
   }
 
   .btn {
@@ -35,26 +94,35 @@ body {
   }
 
   .btn-ghost {
-    @apply btn border border-white/15 bg-white/5 text-slate-100 hover:bg-white/10;
+    @apply btn border border-line bg-surface text-fg hover:bg-surface-hover;
   }
 
   .field {
-    @apply w-full rounded-xl border border-white/15 bg-ink-900/70 px-4 py-3 text-lg
-           outline-none transition focus:border-gold-400 focus:ring-2 focus:ring-gold-400/30;
+    @apply w-full rounded-xl border border-line px-4 py-3 text-lg text-fg
+           outline-none transition focus:border-gold-500 focus:ring-2 focus:ring-gold-400/30;
+    background-color: var(--field-bg);
   }
 
   .badge {
     @apply inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide;
   }
 
+  .badge-accent {
+    @apply badge bg-accent-soft text-accent;
+  }
+
   .title-shine {
-    background: linear-gradient(90deg, #ffd166, #ffffff, #5eead4, #ffd166);
+    background: linear-gradient(90deg, #d9971a, var(--shine-mid), #12a695, #d9971a);
     background-size: 200% auto;
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
     animation: shine 6s linear infinite;
   }
+}
+
+.dark .title-shine {
+  background-image: linear-gradient(90deg, #ffd166, var(--shine-mid), #5eead4, #ffd166);
 }
 
 /* Barre de temps du joueur */
@@ -67,6 +135,6 @@ body {
   height: 10px;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.14);
+  background: var(--line-strong);
   border-radius: 999px;
 }

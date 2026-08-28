@@ -52,7 +52,7 @@ export function JoinForm() {
   return (
     <form onSubmit={handleSubmit} className="mt-8 flex flex-1 flex-col gap-6">
       <div>
-        <label htmlFor="player-name" className="mb-2 block text-sm font-semibold text-slate-300">
+        <label htmlFor="player-name" className="mb-2 block text-sm font-semibold text-muted">
           Votre nom ou celui de votre equipe
         </label>
         <input
@@ -68,10 +68,10 @@ export function JoinForm() {
       </div>
 
       <div>
-        <p className="mb-2 text-sm font-semibold text-slate-300">Choisissez votre defi</p>
+        <p className="mb-2 text-sm font-semibold text-muted">Choisissez votre defi</p>
         <div className="grid gap-3">
           {games.length === 0 && (
-            <div className="card animate-pulse p-6 text-center text-sm text-slate-500">
+            <div className="card animate-pulse p-6 text-center text-sm text-faint">
               Chargement des categories...
             </div>
           )}
@@ -86,19 +86,19 @@ export function JoinForm() {
                 className={[
                   "card flex items-center gap-4 p-4 text-left transition",
                   active
-                    ? "border-gold-400 bg-gold-400/10 ring-2 ring-gold-400/40"
-                    : "hover:border-white/25 hover:bg-white/[0.07]",
+                    ? "border-gold-400 bg-accent-soft ring-2 ring-gold-400/40"
+                    : "hover:border-line-strong hover:bg-surface-hover",
                 ].join(" ")}
               >
                 <span className="text-3xl">{game.emoji}</span>
                 <span className="min-w-0 flex-1">
                   <span className="block font-bold">{game.name}</span>
-                  <span className="block text-xs leading-snug text-slate-400">{game.description}</span>
+                  <span className="block text-xs leading-snug text-muted">{game.description}</span>
                 </span>
                 <span
                   className={[
                     "flex h-6 w-6 shrink-0 items-center justify-center rounded-full border text-xs",
-                    active ? "border-gold-400 bg-gold-400 text-ink-950" : "border-white/25",
+                    active ? "border-gold-400 bg-gold-400 text-ink-950" : "border-line-strong",
                   ].join(" ")}
                   aria-hidden
                 >
@@ -111,7 +111,7 @@ export function JoinForm() {
       </div>
 
       {error && (
-        <p role="alert" className="rounded-xl border border-rose-500/40 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
+        <p role="alert" className="rounded-xl border border-rose-500/40 bg-rose-500/10 px-4 py-3 text-sm text-rose-700 dark:text-rose-200">
           {error}
         </p>
       )}
@@ -120,7 +120,7 @@ export function JoinForm() {
         <button type="submit" className="btn-primary w-full text-lg" disabled={submitting}>
           {submitting ? "Preparation de la partie..." : "Commencer"}
         </button>
-        <p className="mt-3 text-center text-xs text-slate-500">
+        <p className="mt-3 text-center text-xs text-faint">
           10 questions &middot; plus vous repondez vite, plus vous marquez de points.
         </p>
       </div>

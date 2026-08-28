@@ -21,30 +21,30 @@ export function DisplayClient({ joinUrl }: { joinUrl: string }) {
     <main className="flex min-h-screen flex-col px-8 py-6">
       <header className="flex items-center justify-between">
         <div>
-          <p className="badge bg-gold-400/15 text-gold-400">Business &middot; Innovation &middot; Cameroun</p>
+          <p className="badge bg-accent-soft text-accent">Business &middot; Innovation &middot; Cameroun</p>
           <h1 className="mt-2 text-4xl font-black leading-none xl:text-5xl">
             <span className="title-shine">iCLAN Entrepreneur Challenge</span>
           </h1>
         </div>
         <div className="text-right">
-          <p className="flex items-center justify-end gap-2 text-sm text-slate-400">
+          <p className="flex items-center justify-end gap-2 text-sm text-muted">
             <span
               className={`h-2.5 w-2.5 rounded-full ${connected ? "bg-emerald-400 animate-pulse-slow" : "bg-rose-400"}`}
               aria-hidden
             />
             {connected ? "Classement en direct" : "Reconnexion..."}
           </p>
-          <p className="mt-1 text-5xl font-black tabular-nums text-gold-400">
+          <p className="mt-1 text-5xl font-black tabular-nums text-accent">
             {stats?.totalPlayers ?? 0}
           </p>
-          <p className="text-xs uppercase tracking-widest text-slate-400">joueurs connectes</p>
+          <p className="text-xs uppercase tracking-widest text-muted">joueurs connectes</p>
         </div>
       </header>
 
       <div className="mt-6 grid flex-1 gap-8 lg:grid-cols-[minmax(0,26rem)_minmax(0,1fr)]">
         <section className="flex flex-col gap-5">
           <div className="card flex flex-col items-center p-6 text-center">
-            <p className="text-lg font-bold uppercase tracking-widest text-gold-400">
+            <p className="text-lg font-bold uppercase tracking-widest text-accent">
               Scannez pour jouer
             </p>
             <div className="mt-4 w-full max-w-[19rem] overflow-hidden rounded-2xl bg-white p-3">
@@ -55,15 +55,15 @@ export function DisplayClient({ joinUrl }: { joinUrl: string }) {
                 className="h-auto w-full"
               />
             </div>
-            <p className="mt-4 break-all text-sm font-semibold text-slate-300">{displayUrl}</p>
-            <p className="mt-1 text-xs text-slate-500">
+            <p className="mt-4 break-all text-sm font-semibold text-muted">{displayUrl}</p>
+            <p className="mt-1 text-xs text-faint">
               Aucune application a installer : tout se passe dans le navigateur.
             </p>
           </div>
 
           {stats && (
             <div className="card p-5">
-              <p className="text-sm font-bold uppercase tracking-widest text-slate-400">
+              <p className="text-sm font-bold uppercase tracking-widest text-muted">
                 Participation par defi
               </p>
               <ul className="mt-3 space-y-2">
@@ -71,13 +71,13 @@ export function DisplayClient({ joinUrl }: { joinUrl: string }) {
                   <li key={game.slug} className="flex items-center justify-between text-lg">
                     <span className="flex items-center gap-2">
                       <span aria-hidden>{game.emoji}</span>
-                      <span className="text-slate-200">{game.name}</span>
+                      <span className="text-fg">{game.name}</span>
                     </span>
-                    <span className="font-bold tabular-nums text-gold-400">{game.players}</span>
+                    <span className="font-bold tabular-nums text-accent">{game.players}</span>
                   </li>
                 ))}
               </ul>
-              <div className="mt-4 flex justify-between border-t border-white/10 pt-3 text-sm">
+              <div className="mt-4 flex justify-between border-t border-line pt-3 text-sm">
                 <StatusPill color="bg-emerald-400" label="En jeu" value={stats.playing} />
                 <StatusPill color="bg-amber-400" label="En attente" value={stats.waiting} />
                 <StatusPill color="bg-rose-400" label="Termines" value={stats.finished} />
@@ -95,7 +95,7 @@ export function DisplayClient({ joinUrl }: { joinUrl: string }) {
             <Leaderboard entries={entries} />
           </div>
           {started && stats && (
-            <p className="mt-4 text-sm text-slate-500">
+            <p className="mt-4 text-sm text-faint">
               Score moyen : {stats.averageScore.toLocaleString("fr-FR")} points
             </p>
           )}
@@ -107,10 +107,10 @@ export function DisplayClient({ joinUrl }: { joinUrl: string }) {
 
 function StatusPill({ color, label, value }: { color: string; label: string; value: number }) {
   return (
-    <span className="flex items-center gap-2 text-slate-300">
+    <span className="flex items-center gap-2 text-muted">
       <span className={`h-2 w-2 rounded-full ${color}`} aria-hidden />
       {label}
-      <strong className="tabular-nums text-slate-100">{value}</strong>
+      <strong className="tabular-nums text-fg">{value}</strong>
     </span>
   );
 }

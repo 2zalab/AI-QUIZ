@@ -2,9 +2,31 @@ import type { Config } from "tailwindcss";
 
 const config: Config = {
   content: ["./src/**/*.{js,ts,jsx,tsx,mdx}"],
+  darkMode: "class",
   theme: {
     extend: {
       colors: {
+        // Jetons semantiques : leur valeur change avec le theme clair / sombre
+        // (voir les variables CSS de globals.css).
+        canvas: "var(--canvas)",
+        fg: "var(--fg)",
+        muted: "var(--muted)",
+        faint: "var(--faint)",
+        surface: {
+          DEFAULT: "var(--surface)",
+          hover: "var(--surface-hover)",
+          soft: "var(--surface-soft)",
+        },
+        chip: "var(--chip)",
+        line: {
+          DEFAULT: "var(--line)",
+          strong: "var(--line-strong)",
+        },
+        accent: {
+          DEFAULT: "var(--accent)",
+          soft: "var(--accent-soft)",
+          line: "var(--accent-line)",
+        },
         ink: {
           950: "#070b18",
           900: "#0b1024",

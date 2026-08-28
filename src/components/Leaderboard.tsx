@@ -31,7 +31,7 @@ export function Leaderboard({
       <div className="card flex flex-col items-center gap-3 p-10 text-center">
         <span className="text-5xl">{"\u{1F4E1}"}</span>
         <p className="text-lg font-semibold">En attente des premiers joueurs</p>
-        <p className="text-sm text-slate-400">Scannez le QR code pour ouvrir le bal.</p>
+        <p className="text-sm text-muted">Scannez le QR code pour ouvrir le bal.</p>
       </div>
     );
   }
@@ -48,7 +48,7 @@ export function Leaderboard({
             className={[
               "card flex items-center gap-4 px-4 transition-all duration-300 animate-fade-up",
               compact ? "py-2.5" : "py-3.5",
-              isTop ? "border-gold-400/40 bg-gold-400/[0.07]" : "",
+              isTop ? "border-accent-line bg-accent-soft" : "",
               isMe ? "ring-2 ring-brand-400/70" : "",
             ].join(" ")}
           >
@@ -56,7 +56,7 @@ export function Leaderboard({
               className={[
                 "flex shrink-0 items-center justify-center font-black tabular-nums",
                 compact ? "w-9 text-lg" : "w-12 text-2xl",
-                isTop ? "text-gold-400" : "text-slate-400",
+                isTop ? "text-accent" : "text-muted",
               ].join(" ")}
             >
               {isTop ? MEDALS[entry.rank - 1] : entry.rank}
@@ -66,7 +66,7 @@ export function Leaderboard({
               <p className={compact ? "truncate font-semibold" : "truncate text-xl font-bold"}>
                 {entry.name}
               </p>
-              <p className="flex items-center gap-2 text-xs text-slate-400">
+              <p className="flex items-center gap-2 text-xs text-muted">
                 <span className={`h-2 w-2 rounded-full ${status.dot}`} aria-hidden />
                 {status.label}
                 <span aria-hidden>&middot;</span>
@@ -81,7 +81,7 @@ export function Leaderboard({
               className={[
                 "shrink-0 font-black tabular-nums",
                 compact ? "text-lg" : "text-3xl",
-                isTop ? "text-gold-400" : "text-slate-100",
+                isTop ? "text-accent" : "text-fg",
               ].join(" ")}
             >
               {entry.score.toLocaleString("fr-FR")}

@@ -43,7 +43,7 @@ export function AdminClient() {
   if (authenticated === null) {
     return (
       <main className="flex min-h-screen items-center justify-center">
-        <p className="animate-pulse text-slate-400">Verification...</p>
+        <p className="animate-pulse text-muted">Verification...</p>
       </main>
     );
   }
@@ -52,7 +52,7 @@ export function AdminClient() {
     return (
       <main className="mx-auto flex min-h-screen max-w-sm flex-col justify-center px-6">
         <h1 className="text-2xl font-black">Espace organisateur</h1>
-        <p className="mt-2 text-sm text-slate-400">
+        <p className="mt-2 text-sm text-muted">
           Saisissez le mot de passe defini dans la variable ADMIN_PASSWORD.
         </p>
         <form onSubmit={login} className="mt-6 space-y-4">
@@ -65,7 +65,7 @@ export function AdminClient() {
             autoFocus
           />
           {error && (
-            <p role="alert" className="text-sm text-rose-300">
+            <p role="alert" className="text-sm text-rose-700 dark:text-rose-300">
               {error}
             </p>
           )}
@@ -73,7 +73,7 @@ export function AdminClient() {
             Se connecter
           </button>
         </form>
-        <Link href="/" className="mt-6 text-center text-sm text-slate-500 hover:text-slate-300">
+        <Link href="/" className="mt-6 text-center text-sm text-faint hover:text-muted">
           Retour a l&apos;accueil
         </Link>
       </main>
@@ -116,7 +116,7 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
       <header className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-black">Espace organisateur</h1>
-          <p className="mt-1 flex items-center gap-2 text-sm text-slate-400">
+          <p className="mt-1 flex items-center gap-2 text-sm text-muted">
             <span
               className={`h-2 w-2 rounded-full ${connected ? "bg-emerald-400" : "bg-rose-400"}`}
               aria-hidden
@@ -143,7 +143,7 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
       </header>
 
       {config?.mode === "memory" && (
-        <p className="mt-6 rounded-xl border border-amber-400/40 bg-amber-400/10 px-4 py-3 text-sm text-amber-100">
+        <p className="mt-6 rounded-xl border border-amber-400/40 bg-amber-400/10 px-4 py-3 text-sm text-amber-800 dark:text-amber-100">
           Mode demonstration : les parties sont stockees en memoire et disparaissent au redemarrage
           du serveur. Renseignez les variables Supabase pour un evenement reel.
         </p>
@@ -164,7 +164,7 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
 
         <aside className="space-y-5">
           <div className="card p-5">
-            <h3 className="text-sm font-bold uppercase tracking-widest text-slate-400">
+            <h3 className="text-sm font-bold uppercase tracking-widest text-muted">
               Participation par defi
             </h3>
             <ul className="mt-3 space-y-2 text-sm">
@@ -181,10 +181,10 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
 
           {config && (
             <div className="card p-5">
-              <h3 className="text-sm font-bold uppercase tracking-widest text-slate-400">
+              <h3 className="text-sm font-bold uppercase tracking-widest text-muted">
                 Lien de participation
               </h3>
-              <p className="mt-2 break-all text-sm text-slate-200">{config.joinUrl}</p>
+              <p className="mt-2 break-all text-sm text-fg">{config.joinUrl}</p>
               <div className="mt-3 rounded-xl bg-white p-2">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src="/api/qr" alt="QR code de participation" className="h-auto w-full" />
@@ -193,10 +193,10 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
           )}
 
           <div className="card p-5">
-            <h3 className="text-sm font-bold uppercase tracking-widest text-slate-400">
+            <h3 className="text-sm font-bold uppercase tracking-widest text-muted">
               Nouvelle manche
             </h3>
-            <p className="mt-2 text-sm text-slate-400">
+            <p className="mt-2 text-sm text-muted">
               Efface tous les joueurs et repart d&apos;un classement vierge.
             </p>
             {confirming ? (
@@ -213,7 +213,7 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
                 Remettre le classement a zero
               </button>
             )}
-            {message && <p className="mt-3 text-sm text-slate-300">{message}</p>}
+            {message && <p className="mt-3 text-sm text-muted">{message}</p>}
           </div>
         </aside>
       </div>
@@ -224,10 +224,10 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
 function Metric({ label, value, accent = false }: { label: string; value: number; accent?: boolean }) {
   return (
     <div className="card p-5">
-      <p className={`text-4xl font-black tabular-nums ${accent ? "text-gold-400" : ""}`}>
+      <p className={`text-4xl font-black tabular-nums ${accent ? "text-accent" : ""}`}>
         {value.toLocaleString("fr-FR")}
       </p>
-      <p className="mt-1 text-xs uppercase tracking-widest text-slate-400">{label}</p>
+      <p className="mt-1 text-xs uppercase tracking-widest text-muted">{label}</p>
     </div>
   );
 }

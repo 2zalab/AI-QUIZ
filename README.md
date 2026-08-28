@@ -64,7 +64,18 @@ met a jour en direct sur le grand ecran. **Aucune application a installer.**
 | `/join` puis `/game/:code` | Participants | Saisie du nom, choix du defi, questions chronometrees, resultat final |
 | `/admin` | Organisateur | Statistiques, classement, lien et QR de participation, remise a zero entre deux manches |
 
+Le theme choisi sur la page d'accueil s'applique partout (voir ci-dessous).
+
 `/` est une page d'accueil qui renvoie vers les trois.
+
+### Theme clair / sombre
+
+Un bouton en haut de la page d'accueil bascule entre le **theme sombre**
+(par defaut, pensé pour la projection en salle) et un **theme clair**, utile
+sur un videoprojecteur peu contraste ou en plein jour. Le choix est memorise
+dans le navigateur et s'applique a toutes les pages, y compris `/display`,
+`/game/:code` et `/admin`. Il est reapplique avant le premier rendu, sans
+clignotement au chargement.
 
 ---
 
@@ -242,7 +253,9 @@ src/
 │       ├── leaderboard/stream/     Flux Server-Sent Events du classement
 │       ├── qr/                     QR code SVG
 │       └── admin/                  Authentification et remise a zero
-├── components/Leaderboard.tsx
+├── components/
+│   ├── Leaderboard.tsx
+│   └── ThemeToggle.tsx             Bascule clair / sombre (jetons CSS)
 └── lib/
     ├── config.ts                   Categories, quotas de difficulte
     ├── scoring.ts                  Calcul des points et bonus de rapidite

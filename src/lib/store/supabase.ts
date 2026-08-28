@@ -212,7 +212,17 @@ export function createSupabaseStore(): Store {
         .select("id, difficulty")
         .eq("game_id", gameId);
       const rows = (pool ?? []) as { id: string; difficulty: Difficulty }[];
-      if (rows.length === 0) throw new Error("Aucune question disponible pour cette categorie.");
+      if (rows.length === 0) {
+        // Cas typique d'un projet Supabase dont le schema est en place mais dont
+        // la banque n'a jamais ete alimentee.
+        console.error(
+          `[iCLAN] La table questions est vide pour la categorie "${gameSlug}". ` +
+            "Lancez `npm run db:import` avec les variables Supabase du projet.",
+        );
+        throw new Error(
+          "Aucune question n'a encore ete importee pour ce defi. L'organisateur doit lancer l'import des questions.",
+        );
+      }
 
       let sessionCode = generateSessionCode();
       let inserted: { id: string } | null = null;

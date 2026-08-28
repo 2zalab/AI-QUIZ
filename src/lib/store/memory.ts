@@ -103,7 +103,16 @@ export function createMemoryStore(): Store {
       }
 
       const pool = loadQuestionsFromCsv().get(gameSlug) ?? [];
-      if (pool.length === 0) throw new Error("Aucune question disponible pour cette categorie.");
+      if (pool.length === 0) {
+        // En mode demonstration, la banque vient des CSV du dossier data/.
+        console.error(
+          `[iCLAN] Aucune question chargee pour la categorie "${gameSlug}". ` +
+            "Verifiez le dossier data/ ou lancez `npm run questions:generate`.",
+        );
+        throw new Error(
+          "Aucune question n'a encore ete importee pour ce defi. L'organisateur doit lancer l'import des questions.",
+        );
+      }
 
       const perSession = clampQuestionsPerSession(
         configured.questionsPerSession ?? game.questionsPerSession,

@@ -172,14 +172,22 @@ NEXT_PUBLIC_APP_URL=http://192.168.1.24:3000 npm run dev
 
    Les cles se trouvent dans *Project Settings → API*.
 
-4. **Importer les questions** :
+4. **Importer les questions** — etape indispensable, souvent oubliee :
 
    ```bash
    npm run questions:generate   # si data/ est vide
    npm run db:import            # 4 000 questions vers Supabase
    ```
 
-5. **Demarrer** : `npm run dev`. L'espace organisateur affiche desormais
+   Renseigner les variables d'environnement ne suffit pas : sans cet import,
+   la table `questions` reste vide et les joueurs voient le message
+   « Aucune question n'a encore ete importee pour ce defi ».
+
+5. **Verifier** : `npm run db:check`. Le script controle les variables, la
+   connexion, les tables, les quatre categories, le nombre de questions
+   importees et l'etancheite des politiques RLS.
+
+6. **Demarrer** : `npm run dev`. L'espace organisateur affiche desormais
    « stockage : Supabase ».
 
 ---
@@ -187,10 +195,24 @@ NEXT_PUBLIC_APP_URL=http://192.168.1.24:3000 npm run dev
 ## Deploiement sur Vercel
 
 1. Poussez le depot sur GitHub, puis importez-le dans Vercel.
-2. Ajoutez les variables d'environnement du projet (les memes que `.env.local`),
-   en definissant `NEXT_PUBLIC_APP_URL` sur l'URL de production — c'est elle qui
-   sera encodee dans le QR code.
-3. Deployez. Aucune autre configuration n'est necessaire.
+2. Dans **Settings > Environment Variables**, ajoutez les memes variables que
+   dans `.env.local`, en definissant `NEXT_PUBLIC_APP_URL` sur l'URL de
+   production : c'est elle qui sera encodee dans le QR code. Ne prefixez jamais
+   `SUPABASE_SERVICE_ROLE_KEY` ni `ADMIN_PASSWORD` par `NEXT_PUBLIC_`, ce
+   prefixe exposerait la valeur au navigateur.
+3. **Redeployez** : les variables ne s'appliquent qu'aux nouveaux deploiements,
+   celui deja en ligne conserve les anciennes valeurs.
+4. Les questions vivent dans Supabase, pas dans le code deploye : l'import
+   (`npm run db:import`) se lance depuis votre machine et n'a a etre fait
+   qu'une fois. Verifiez avec `npm run db:check`.
+
+### Le deploiement fonctionne mais aucune question n'apparait
+
+Le message « Aucune question n'a encore ete importee pour ce defi » signifie que
+la table `questions` de Supabase est vide. En local, l'application lit les CSV du
+dossier `data/` ; en production avec Supabase configure, elle lit la base. Lancez
+`npm run db:import` depuis votre machine, avec les variables du projet, puis
+`npm run db:check` pour confirmer.
 
 ---
 
@@ -324,6 +346,7 @@ npm run start                # serveur de production
 npm run typecheck            # verification TypeScript
 npm run questions:generate   # regenere les 4 CSV de questions
 npm run questions:check      # controle qualite des CSV
+npm run db:check             # verifie le projet Supabase (tables, questions, RLS)
 npm run db:import            # importe les CSV dans Supabase
 ```
 

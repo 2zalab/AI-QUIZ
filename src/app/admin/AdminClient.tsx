@@ -6,6 +6,32 @@ import { Leaderboard } from "@/components/Leaderboard";
 import { useLeaderboard } from "@/lib/useLeaderboard";
 import type { Game } from "@/lib/types";
 
+interface PasswordConfig {
+  configured: boolean;
+  usingFallback: boolean;
+  hasWhitespaceEdges: boolean;
+  looksLikeAssignment: boolean;
+  hasSurroundingQuotes: boolean;
+}
+
+/** Traduit le diagnostic serveur en conseil actionnable pour l'organisateur. */
+function configHint(config: PasswordConfig | null): string | null {
+  if (!config) return null;
+  if (config.looksLikeAssignment) {
+    return "La variable contient la ligne entiere « ADMIN_PASSWORD=... ». Dans le champ Value de votre hebergeur, ne mettez que le mot de passe, sans le nom de la variable ni le signe egal.";
+  }
+  if (config.hasSurroundingQuotes) {
+    return "La variable est entouree de guillemets. Retirez-les : la valeur doit etre le mot de passe seul.";
+  }
+  if (config.hasWhitespaceEdges) {
+    return "La variable contient un espace ou un retour a la ligne en debut ou en fin. Il est ignore par l'application, mais verifiez la valeur enregistree.";
+  }
+  if (config.usingFallback) {
+    return "La variable ADMIN_PASSWORD n'est pas visible par l'application : soit elle n'a pas ete enregistree pour cet environnement, soit le projet n'a pas ete redeploye depuis. Le mot de passe de repli est actuellement actif.";
+  }
+  return null;
+}
+
 interface AppConfig {
   joinUrl: string;
   mode: "supabase" | "memory";
@@ -16,11 +42,15 @@ export function AdminClient() {
   const [authenticated, setAuthenticated] = useState<boolean | null>(null);
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [config, setConfig] = useState<PasswordConfig | null>(null);
 
   useEffect(() => {
     fetch("/api/admin/login", { cache: "no-store" })
       .then((response) => response.json())
-      .then((payload) => setAuthenticated(Boolean(payload.authenticated)))
+      .then((payload) => {
+        setAuthenticated(Boolean(payload.authenticated));
+        if (payload.config) setConfig(payload.config as PasswordConfig);
+      })
       .catch(() => setAuthenticated(false));
   }, []);
 
@@ -38,6 +68,7 @@ export function AdminClient() {
     } else {
       const payload = await response.json().catch(() => ({}));
       setError(payload.error ?? "Connexion refusee.");
+      if (payload.config) setConfig(payload.config as PasswordConfig);
     }
   }
 
@@ -55,6 +86,14 @@ export function AdminClient() {
         <h1 className="text-2xl font-black">Espace organisateur</h1>
         <p className="mt-2 text-sm text-muted">
           Saisissez le mot de passe defini dans la variable ADMIN_PASSWORD.
+          {config?.usingFallback && (
+            <>
+              {" "}
+              <span className="text-amber-700 dark:text-amber-300">
+                Cette variable n&apos;est pas encore active sur ce deploiement.
+              </span>
+            </>
+          )}
         </p>
         <form onSubmit={login} className="mt-6 space-y-4">
           <input
@@ -68,6 +107,11 @@ export function AdminClient() {
           {error && (
             <p role="alert" className="text-sm text-rose-700 dark:text-rose-300">
               {error}
+            </p>
+          )}
+          {error && configHint(config) && (
+            <p className="rounded-xl border border-amber-400/40 bg-amber-400/10 px-4 py-3 text-sm leading-relaxed text-amber-800 dark:text-amber-100">
+              {configHint(config)}
             </p>
           )}
           <button type="submit" className="btn-primary w-full">
@@ -323,6 +367,15 @@ function GameSettingsPanel() {
         cours ne changent pas.
       </p>
 
+      {games.some((game) => game.questionCount === 0) && (
+        <p className="mb-3 rounded-xl border border-rose-500/40 bg-rose-500/10 px-4 py-3 text-sm leading-relaxed text-rose-700 dark:text-rose-200">
+          Une ou plusieurs categories n&apos;ont aucune question en base : les joueurs ne pourront
+          pas y jouer. Lancez l&apos;import depuis le projet, avec les variables Supabase
+          renseignees : <code className="font-mono">npm run db:import</code> (puis
+          <code className="font-mono"> npm run db:check</code> pour verifier).
+        </p>
+      )}
+
       {notice && (
         <p className="mb-3 rounded-xl border border-amber-400/40 bg-amber-400/10 px-4 py-2 text-sm text-amber-800 dark:text-amber-100">
           {notice}
@@ -343,10 +396,16 @@ function GameSettingsPanel() {
             </span>
             <span className="min-w-0 flex-1">
               <span className="block font-bold">{game.name}</span>
-              <span className="block text-xs text-faint">
-                banque de {game.questionCount.toLocaleString("fr-FR")} questions &middot; maximum
-                reglable : {game.questionCount.toLocaleString("fr-FR")}
-              </span>
+              {game.questionCount === 0 ? (
+                <span className="block text-xs font-semibold text-rose-700 dark:text-rose-300">
+                  banque vide : aucune question importee
+                </span>
+              ) : (
+                <span className="block text-xs text-faint">
+                  banque de {game.questionCount.toLocaleString("fr-FR")} questions &middot; maximum
+                  reglable : {game.questionCount.toLocaleString("fr-FR")}
+                </span>
+              )}
             </span>
 
             <label className="flex items-center gap-2 text-sm">

@@ -1,10 +1,22 @@
 import { NextResponse } from "next/server";
-import { ADMIN_COOKIE, adminPassword, adminToken, isAdmin } from "@/lib/admin";
+import {
+  ADMIN_COOKIE, adminPassword, adminToken, isAdmin, passwordDiagnostics,
+} from "@/lib/admin";
 
 export const dynamic = "force-dynamic";
 
+/**
+ * Etat de la session organisateur, accompagne d'un diagnostic de configuration.
+ *
+ * Le diagnostic ne revele jamais le mot de passe : il signale seulement les
+ * erreurs de saisie courantes dans la variable d'environnement, pour eviter de
+ * chercher a l'aveugle apres un deploiement.
+ */
 export async function GET() {
-  return NextResponse.json({ authenticated: await isAdmin() });
+  return NextResponse.json({
+    authenticated: await isAdmin(),
+    config: passwordDiagnostics(),
+  });
 }
 
 export async function POST(request: Request) {
@@ -15,8 +27,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Requete invalide." }, { status: 400 });
   }
 
-  if ((payload.password ?? "") !== adminPassword()) {
-    return NextResponse.json({ error: "Mot de passe incorrect." }, { status: 401 });
+  // Le mot de passe saisi est nettoye comme la variable : un espace ajoute par
+  // le clavier d'un telephone ne doit pas bloquer l'organisateur.
+  if ((payload.password ?? "").trim() !== adminPassword()) {
+    return NextResponse.json(
+      { error: "Mot de passe incorrect.", config: passwordDiagnostics() },
+      { status: 401 },
+    );
   }
 
   const response = NextResponse.json({ authenticated: true });

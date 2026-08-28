@@ -40,7 +40,13 @@ export function loadQuestionsFromCsv(dataDir = path.join(process.cwd(), "data"))
     let raw: string;
     try {
       raw = readFileSync(fullPath, "utf-8");
-    } catch {
+    } catch (error) {
+      // Sans ce journal, une banque vide passerait totalement inapercue.
+      console.error(
+        `[iCLAN] Fichier de questions illisible : ${fullPath}. ` +
+          "En mode demonstration, verifiez que le dossier data/ est bien deploye " +
+          `(${error instanceof Error ? error.message : String(error)}).`,
+      );
       loaded.set(slug, []);
       continue;
     }

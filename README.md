@@ -208,11 +208,18 @@ NEXT_PUBLIC_APP_URL=http://192.168.1.24:3000 npm run dev
 
 ### Le deploiement fonctionne mais aucune question n'apparait
 
-Le message « Aucune question n'a encore ete importee pour ce defi » signifie que
-la table `questions` de Supabase est vide. En local, l'application lit les CSV du
-dossier `data/` ; en production avec Supabase configure, elle lit la base. Lancez
-`npm run db:import` depuis votre machine, avec les variables du projet, puis
-`npm run db:check` pour confirmer.
+Ouvrez `https://votre-projet.vercel.app/api/config` : cette page indique, sans
+rien reveler de secret, le mode de stockage actif, les variables que le
+deploiement voit reellement et le nombre de questions accessibles par categorie.
+
+| Ce que vous lisez | Ce que cela signifie |
+| --- | --- |
+| `"mode": "memory"` alors que Supabase est configure | les variables ne sont pas arrivees jusqu'a l'application : verifiez qu'elles sont bien dans **Vercel > Settings > Environment Variables** (et non dans le tableau de bord Supabase), pour l'environnement Production, puis **redeployez** |
+| `"mode": "supabase"` et `banks` a 0 | la table `questions` est vide : lancez `npm run db:import` depuis votre machine, puis `npm run db:check` |
+| `SUPABASE_SERVICE_ROLE_KEY: false` | la cle de service manque ; sans elle l'application bascule en mode demonstration |
+
+Rappel : les variables d'environnement ne s'appliquent qu'aux **nouveaux**
+deploiements. Apres les avoir ajoutees, relancez un deploiement.
 
 ---
 

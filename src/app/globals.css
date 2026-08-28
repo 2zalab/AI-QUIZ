@@ -1,0 +1,72 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  @apply bg-ink-950 text-slate-100 antialiased;
+  background-image:
+    radial-gradient(60rem 40rem at 12% -10%, rgba(244, 185, 62, 0.16), transparent 60%),
+    radial-gradient(50rem 34rem at 92% 4%, rgba(34, 200, 176, 0.14), transparent 62%),
+    radial-gradient(46rem 30rem at 50% 108%, rgba(139, 124, 246, 0.14), transparent 60%);
+  background-attachment: fixed;
+}
+
+@layer components {
+  .card {
+    @apply rounded-2xl border border-white/10 bg-white/[0.04] backdrop-blur-sm shadow-xl shadow-black/30;
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 font-semibold
+           transition-all duration-150 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .btn-primary {
+    @apply btn bg-gradient-to-r from-gold-500 to-gold-400 text-ink-950 hover:brightness-110;
+  }
+
+  .btn-ghost {
+    @apply btn border border-white/15 bg-white/5 text-slate-100 hover:bg-white/10;
+  }
+
+  .field {
+    @apply w-full rounded-xl border border-white/15 bg-ink-900/70 px-4 py-3 text-lg
+           outline-none transition focus:border-gold-400 focus:ring-2 focus:ring-gold-400/30;
+  }
+
+  .badge {
+    @apply inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide;
+  }
+
+  .title-shine {
+    background: linear-gradient(90deg, #ffd166, #ffffff, #5eead4, #ffd166);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: shine 6s linear infinite;
+  }
+}
+
+/* Barre de temps du joueur */
+.timer-bar {
+  transition: width 0.25s linear, background-color 0.3s ease;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+}

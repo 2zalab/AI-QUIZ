@@ -244,10 +244,11 @@ function Metric({ label, value, accent = false }: { label: string; value: number
  */
 function GameSettingsPanel() {
   const [games, setGames] = useState<Game[] | null>(null);
-  const [limits, setLimits] = useState({ min: 3, max: 50 });
+  const [limits, setLimits] = useState({ min: 1 });
   const [drafts, setDrafts] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState<string | null>(null);
   const [saved, setSaved] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -256,7 +257,7 @@ function GameSettingsPanel() {
       .then((payload) => {
         if (payload.games) {
           setGames(payload.games);
-          setLimits(payload.limits ?? { min: 3, max: 50 });
+          setLimits(payload.limits ?? { min: 1 });
           setDrafts(
             Object.fromEntries(
               (payload.games as Game[]).map((game) => [game.slug, String(game.questionsPerSession)]),
@@ -270,6 +271,7 @@ function GameSettingsPanel() {
   async function save(slug: string, patch: { questionsPerSession?: number; isActive?: boolean }) {
     setSaving(slug);
     setError(null);
+    setNotice(null);
     try {
       const response = await fetch("/api/admin/games", {
         method: "POST",
@@ -280,6 +282,7 @@ function GameSettingsPanel() {
       if (!response.ok) throw new Error(payload.error ?? "Reglage impossible.");
 
       const updated = payload.game as Game;
+      if (payload.notice) setNotice(payload.notice as string);
       setGames((current) =>
         (current ?? []).map((game) => (game.slug === slug ? updated : game)),
       );
@@ -315,9 +318,16 @@ function GameSettingsPanel() {
     <div>
       <h2 className="mb-1 text-xl font-bold">Reglage des defis</h2>
       <p className="mb-3 text-sm text-muted">
-        Nombre de questions servies par partie ({limits.min} a {limits.max}). La modification
-        s&apos;applique aux parties lancees ensuite ; celles deja en cours ne changent pas.
+        Nombre de questions servies par partie. Le seul plafond est la taille de la banque de la
+        categorie. La modification s&apos;applique aux parties lancees ensuite ; celles deja en
+        cours ne changent pas.
       </p>
+
+      {notice && (
+        <p className="mb-3 rounded-xl border border-amber-400/40 bg-amber-400/10 px-4 py-2 text-sm text-amber-800 dark:text-amber-100">
+          {notice}
+        </p>
+      )}
 
       {error && (
         <p role="alert" className="mb-3 rounded-xl border border-rose-500/40 bg-rose-500/10 px-4 py-2 text-sm text-rose-700 dark:text-rose-200">
@@ -334,7 +344,8 @@ function GameSettingsPanel() {
             <span className="min-w-0 flex-1">
               <span className="block font-bold">{game.name}</span>
               <span className="block text-xs text-faint">
-                banque de {game.questionCount.toLocaleString("fr-FR")} questions
+                banque de {game.questionCount.toLocaleString("fr-FR")} questions &middot; maximum
+                reglable : {game.questionCount.toLocaleString("fr-FR")}
               </span>
             </span>
 
@@ -344,7 +355,7 @@ function GameSettingsPanel() {
                 type="number"
                 inputMode="numeric"
                 min={limits.min}
-                max={limits.max}
+                max={game.questionCount || undefined}
                 value={drafts[game.slug] ?? ""}
                 disabled={saving === game.slug}
                 onChange={(event) =>

@@ -34,7 +34,9 @@ create table if not exists games (
   description           text        not null default '',
   emoji                 text        not null default '',
   color                 text        not null default '#f4b93e',
-  questions_per_session smallint    not null default 10 check (questions_per_session between 3 and 50),
+  -- Pas de plafond arbitraire : le nombre de questions par partie est borne a
+  -- l'execution par la taille de la banque de la categorie.
+  questions_per_session integer     not null default 10 check (questions_per_session > 0),
   is_active             boolean     not null default true,
   created_at            timestamptz not null default now()
 );

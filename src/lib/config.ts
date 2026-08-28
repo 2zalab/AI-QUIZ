@@ -7,14 +7,21 @@ import type { Game } from "./types";
  */
 export const QUESTIONS_PER_SESSION = Number(process.env.QUESTIONS_PER_SESSION ?? 10);
 
-/** Bornes acceptees par le reglage (identiques a la contrainte SQL). */
-export const MIN_QUESTIONS_PER_SESSION = 3;
-export const MAX_QUESTIONS_PER_SESSION = 50;
+/** Une partie compte au minimum une question. */
+export const MIN_QUESTIONS_PER_SESSION = 1;
 
-/** Ramene une valeur saisie dans les bornes autorisees. */
-export function clampQuestionsPerSession(value: number): number {
+/**
+ * Ramene une valeur saisie dans les bornes reellement praticables.
+ *
+ * Il n'y a pas de plafond arbitraire : la seule limite est le nombre de
+ * questions disponibles dans la banque de la categorie. Sans banque connue,
+ * la valeur est simplement arrondie.
+ */
+export function clampQuestionsPerSession(value: number, available?: number): number {
   if (!Number.isFinite(value)) return QUESTIONS_PER_SESSION;
-  return Math.min(MAX_QUESTIONS_PER_SESSION, Math.max(MIN_QUESTIONS_PER_SESSION, Math.round(value)));
+  const rounded = Math.max(MIN_QUESTIONS_PER_SESSION, Math.round(value));
+  if (available === undefined || available <= 0) return rounded;
+  return Math.min(available, rounded);
 }
 
 /** Repartition visee des difficultes dans une partie. Le reste est complete au hasard. */

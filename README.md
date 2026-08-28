@@ -113,9 +113,11 @@ rapporte 300. Une mauvaise reponse ou un temps ecoule rapporte 0.
 Chaque partie sert **10 questions par defaut** (4 faciles, 4 moyennes,
 2 challenge), tirees au hasard et servies de la plus facile a la plus difficile.
 
-Ce nombre se regle **categorie par categorie depuis `/admin`**, entre 3 et 50 :
-une manche courte de 5 questions pour un passage rapide, une finale de 20 pour
-departager. La repartition des difficultes est adaptee proportionnellement. Le
+Ce nombre se regle **categorie par categorie depuis `/admin`**, sans plafond
+arbitraire : une manche courte de 5 questions pour un passage rapide, une finale
+de 20 pour departager, ou davantage. La seule limite est la taille de la banque
+de la categorie (1 000 questions) ; une valeur superieure est automatiquement
+ramenee a ce maximum, et l'interface le signale. La repartition des difficultes est adaptee proportionnellement. Le
 reglage s'applique aux parties lancees ensuite ; celles deja en cours gardent
 leur nombre de questions initial. Chaque categorie peut aussi etre **masquee**,
 elle disparait alors de la page de participation.

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { MAX_QUESTIONS_PER_SESSION, MIN_QUESTIONS_PER_SESSION } from "@/lib/config";
+import { MIN_QUESTIONS_PER_SESSION } from "@/lib/config";
 import { isAdmin } from "@/lib/admin";
 import { getStore } from "@/lib/store";
 
@@ -13,11 +13,17 @@ export async function GET() {
   const store = await getStore();
   return NextResponse.json({
     games: await store.listGames(),
-    limits: { min: MIN_QUESTIONS_PER_SESSION, max: MAX_QUESTIONS_PER_SESSION },
+    limits: { min: MIN_QUESTIONS_PER_SESSION },
   });
 }
 
-/** Reglage d'une categorie : nombre de questions par partie, activation. */
+/**
+ * Reglage d'une categorie : nombre de questions par partie, activation.
+ *
+ * Il n'y a pas de plafond arbitraire. La seule limite est le nombre de
+ * questions disponibles dans la banque de la categorie : une valeur superieure
+ * est ramenee a ce maximum, et la reponse renvoie la valeur reellement retenue.
+ */
 export async function POST(request: Request) {
   if (!(await isAdmin())) {
     return NextResponse.json({ error: "Acces reserve a l'organisateur." }, { status: 401 });
@@ -35,17 +41,12 @@ export async function POST(request: Request) {
 
   const { questionsPerSession, isActive } = payload;
   if (questionsPerSession !== undefined) {
-    if (!Number.isFinite(questionsPerSession)) {
+    if (typeof questionsPerSession !== "number" || !Number.isFinite(questionsPerSession)) {
       return NextResponse.json({ error: "Nombre de questions invalide." }, { status: 400 });
     }
-    if (
-      questionsPerSession < MIN_QUESTIONS_PER_SESSION ||
-      questionsPerSession > MAX_QUESTIONS_PER_SESSION
-    ) {
+    if (questionsPerSession < MIN_QUESTIONS_PER_SESSION) {
       return NextResponse.json(
-        {
-          error: `Le nombre de questions doit etre compris entre ${MIN_QUESTIONS_PER_SESSION} et ${MAX_QUESTIONS_PER_SESSION}.`,
-        },
+        { error: `Une partie compte au moins ${MIN_QUESTIONS_PER_SESSION} question.` },
         { status: 400 },
       );
     }
@@ -54,7 +55,15 @@ export async function POST(request: Request) {
   try {
     const store = await getStore();
     const game = await store.updateGame(slug, { questionsPerSession, isActive });
-    return NextResponse.json({ game });
+    const capped =
+      questionsPerSession !== undefined && game.questionsPerSession < questionsPerSession;
+    return NextResponse.json({
+      game,
+      // Signale a l'interface que la valeur a ete ramenee a la taille de la banque.
+      notice: capped
+        ? `La banque de cette categorie ne contient que ${game.questionCount} questions : le reglage a ete ramene a ${game.questionsPerSession}.`
+        : null,
+    });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Reglage impossible.";
     return NextResponse.json({ error: message }, { status: 400 });

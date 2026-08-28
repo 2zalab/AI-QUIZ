@@ -92,9 +92,7 @@ export function createSupabaseStore(): Store {
     if (!row.is_active) throw new Error("Ce defi n'est plus propose. Choisissez-en un autre.");
     return {
       id: row.id,
-      perSession: clampQuestionsPerSession(
-        row.questions_per_session ?? GAME_BY_SLUG.get(slug)?.questionsPerSession ?? 10,
-      ),
+      perSession: row.questions_per_session ?? GAME_BY_SLUG.get(slug)?.questionsPerSession ?? 10,
     };
   }
 
@@ -170,9 +168,23 @@ export function createSupabaseStore(): Store {
     },
 
     async updateGame(slug, settings): Promise<Game> {
+      const { data: existing } = await db
+        .from("games")
+        .select("id")
+        .eq("slug", slug)
+        .maybeSingle();
+      if (!existing) throw new Error(`Categorie introuvable : ${slug}`);
+      const { count: available } = await db
+        .from("questions")
+        .select("id", { count: "exact", head: true })
+        .eq("game_id", (existing as { id: string }).id);
+
       const patch: Record<string, unknown> = {};
       if (settings.questionsPerSession !== undefined) {
-        patch.questions_per_session = clampQuestionsPerSession(settings.questionsPerSession);
+        patch.questions_per_session = clampQuestionsPerSession(
+          settings.questionsPerSession,
+          available ?? 0,
+        );
       }
       if (settings.isActive !== undefined) patch.is_active = settings.isActive;
 
@@ -187,12 +199,7 @@ export function createSupabaseStore(): Store {
         throw new Error(`Reglage impossible pour ${slug}. ${error?.message ?? ""}`.trim());
       }
 
-      const row = data as GameRow;
-      const { count } = await db
-        .from("questions")
-        .select("id", { count: "exact", head: true })
-        .eq("game_id", row.id);
-      return toGame(row, count ?? 0);
+      return toGame(data as GameRow, available ?? 0);
     },
 
     async createSession(rawName, gameSlug) {
@@ -231,7 +238,7 @@ export function createSupabaseStore(): Store {
         throw new Error(`Impossible de creer la session de jeu. ${lastError ?? ""}`.trim());
       }
 
-      const selection = pickSessionQuestions(rows, perSession);
+      const selection = pickSessionQuestions(rows, clampQuestionsPerSession(perSession, rows.length));
       const { error: linkError } = await db.from("player_questions").insert(
         selection.map((question, index) => ({
           player_id: inserted!.id,

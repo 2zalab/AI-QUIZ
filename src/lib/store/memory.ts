@@ -72,21 +72,22 @@ export function createMemoryStore(): Store {
     async updateGame(slug, settings): Promise<Game> {
       const base = GAME_BY_SLUG.get(slug);
       if (!base) throw new Error("Categorie de jeu inconnue.");
+      const pools = loadQuestionsFromCsv();
+      const available = pools.get(slug)?.length ?? 0;
       const current = state.settings.get(slug) ?? {};
       const next: GameSettings = { ...current };
       if (settings.questionsPerSession !== undefined) {
-        next.questionsPerSession = clampQuestionsPerSession(settings.questionsPerSession);
+        next.questionsPerSession = clampQuestionsPerSession(settings.questionsPerSession, available);
       }
       if (settings.isActive !== undefined) next.isActive = settings.isActive;
       state.settings.set(slug, next);
       bump();
 
-      const pools = loadQuestionsFromCsv();
       return {
         ...base,
         questionsPerSession: next.questionsPerSession ?? base.questionsPerSession,
         isActive: next.isActive ?? base.isActive,
-        questionCount: pools.get(slug)?.length ?? 0,
+        questionCount: available,
       };
     },
 
@@ -106,6 +107,7 @@ export function createMemoryStore(): Store {
 
       const perSession = clampQuestionsPerSession(
         configured.questionsPerSession ?? game.questionsPerSession,
+        pool.length,
       );
 
       let sessionCode = generateSessionCode();

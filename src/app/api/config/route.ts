@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { appUrl } from "@/lib/config";
-import { getStore, hasSupabaseConfig } from "@/lib/store";
+import { getStore, hasSupabaseConfig, missingSupabaseVars } from "@/lib/store";
 
 export const dynamic = "force-dynamic";
 
@@ -13,25 +13,29 @@ export const dynamic = "force-dynamic";
  * qui permet de comprendre en une requete pourquoi une categorie parait vide.
  */
 export async function GET() {
-  const store = await getStore();
+  const present = (name: string) => Boolean((process.env[name] ?? "").trim());
+  const missing = missingSupabaseVars();
 
   let banks: { slug: string; questions: number }[] = [];
   let banksError: string | null = null;
-  try {
-    banks = (await store.listGames()).map((game) => ({
-      slug: game.slug,
-      questions: game.questionCount,
-    }));
-  } catch (error) {
-    banksError = error instanceof Error ? error.message : "lecture impossible";
+  if (missing.length === 0) {
+    try {
+      banks = (await getStore().then((store) => store.listGames())).map((game) => ({
+        slug: game.slug,
+        questions: game.questionCount,
+      }));
+    } catch (error) {
+      banksError = error instanceof Error ? error.message : "lecture impossible";
+    }
+  } else {
+    banksError = `Variables manquantes : ${missing.join(", ")}`;
   }
-
-  const present = (name: string) => Boolean((process.env[name] ?? "").trim());
 
   return NextResponse.json({
     appUrl: appUrl(),
     joinUrl: `${appUrl()}/join`,
-    mode: store.mode,
+    configured: hasSupabaseConfig(),
+    missing,
     realtime: hasSupabaseConfig() && present("NEXT_PUBLIC_SUPABASE_ANON_KEY"),
     env: {
       NEXT_PUBLIC_APP_URL: present("NEXT_PUBLIC_APP_URL"),

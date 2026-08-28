@@ -9,7 +9,12 @@ export async function POST() {
   if (!(await isAdmin())) {
     return NextResponse.json({ error: "Acces reserve a l'organisateur." }, { status: 401 });
   }
-  const store = await getStore();
-  await store.reset();
-  return NextResponse.json({ ok: true });
+  try {
+    const store = await getStore();
+    await store.reset();
+    return NextResponse.json({ ok: true });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Base de donnees indisponible.";
+    return NextResponse.json({ error: message }, { status: 503 });
+  }
 }

@@ -34,7 +34,8 @@ function configHint(config: PasswordConfig | null): string | null {
 
 interface AppConfig {
   joinUrl: string;
-  mode: "supabase" | "memory";
+  configured: boolean;
+  missing: string[];
   realtime: boolean;
 }
 
@@ -171,7 +172,9 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
               <>
                 <span aria-hidden>&middot;</span>
                 <span>
-                  stockage : {config.mode === "supabase" ? "Supabase" : "memoire (demonstration)"}
+                  {config.configured
+                    ? `base Supabase${config.realtime ? " (temps reel actif)" : ""}`
+                    : "base non configuree"}
                 </span>
               </>
             )}
@@ -187,10 +190,11 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
         </div>
       </header>
 
-      {config?.mode === "memory" && (
-        <p className="mt-6 rounded-xl border border-amber-400/40 bg-amber-400/10 px-4 py-3 text-sm text-amber-800 dark:text-amber-100">
-          Mode demonstration : les parties sont stockees en memoire et disparaissent au redemarrage
-          du serveur. Renseignez les variables Supabase pour un evenement reel.
+      {config && !config.configured && (
+        <p className="mt-6 rounded-xl border border-rose-500/40 bg-rose-500/10 px-4 py-3 text-sm leading-relaxed text-rose-700 dark:text-rose-200">
+          La base de donnees n&apos;est pas configuree : l&apos;application ne peut pas fonctionner.
+          Variables manquantes : <strong>{config.missing.join(", ")}</strong>. Ajoutez-les dans les
+          variables d&apos;environnement de votre hebergeur, puis relancez un deploiement.
         </p>
       )}
 
@@ -297,19 +301,24 @@ function GameSettingsPanel() {
 
   useEffect(() => {
     fetch("/api/admin/games", { cache: "no-store" })
-      .then((response) => response.json())
-      .then((payload) => {
-        if (payload.games) {
-          setGames(payload.games);
-          setLimits(payload.limits ?? { min: 1 });
-          setDrafts(
-            Object.fromEntries(
-              (payload.games as Game[]).map((game) => [game.slug, String(game.questionsPerSession)]),
-            ),
-          );
+      .then(async (response) => {
+        const payload = await response.json();
+        if (!response.ok || !payload.games) {
+          throw new Error(payload.error ?? "Impossible de charger les categories.");
         }
+        setGames(payload.games);
+        setLimits(payload.limits ?? { min: 1 });
+        setDrafts(
+          Object.fromEntries(
+            (payload.games as Game[]).map((game) => [game.slug, String(game.questionsPerSession)]),
+          ),
+        );
       })
-      .catch(() => setError("Impossible de charger les categories."));
+      .catch((cause) => {
+        // Sans cela, le panneau resterait bloque sur un chargement perpetuel.
+        setGames([]);
+        setError(cause instanceof Error ? cause.message : "Impossible de charger les categories.");
+      });
   }, []);
 
   async function save(slug: string, patch: { questionsPerSession?: number; isActive?: boolean }) {
@@ -355,6 +364,17 @@ function GameSettingsPanel() {
   if (!games) {
     return (
       <div className="card animate-pulse p-6 text-sm text-faint">Chargement des categories...</div>
+    );
+  }
+
+  if (games.length === 0) {
+    return (
+      <div>
+        <h2 className="mb-1 text-xl font-bold">Reglage des defis</h2>
+        <p className="rounded-xl border border-rose-500/40 bg-rose-500/10 px-4 py-3 text-sm leading-relaxed text-rose-700 dark:text-rose-200">
+          {error ?? "Aucune categorie n'est disponible."}
+        </p>
+      </div>
     );
   }
 

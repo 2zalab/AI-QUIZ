@@ -10,15 +10,21 @@ export const dynamic = "force-dynamic";
  */
 export async function GET(_request: Request, context: { params: Promise<{ code: string }> }) {
   const { code } = await context.params;
-  const store = await getStore();
 
-  let state = await store.getState(code);
-  if (!state) return NextResponse.json({ error: "Session introuvable." }, { status: 404 });
+  try {
+    const store = await getStore();
 
-  if (!state.finished && !state.question) {
-    await store.serveQuestion(code);
-    state = await store.getState(code);
+    let state = await store.getState(code);
+    if (!state) return NextResponse.json({ error: "Session introuvable." }, { status: 404 });
+
+    if (!state.finished && !state.question) {
+      await store.serveQuestion(code);
+      state = await store.getState(code);
+    }
+
+    return NextResponse.json(state);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Base de donnees indisponible.";
+    return NextResponse.json({ error: message }, { status: 503 });
   }
-
-  return NextResponse.json(state);
 }

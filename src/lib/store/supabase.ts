@@ -147,8 +147,6 @@ export function createSupabaseStore(): Store {
   }
 
   return {
-    mode: "supabase",
-
     async listGames(): Promise<Game[]> {
       const { data } = await db
         .from("games")

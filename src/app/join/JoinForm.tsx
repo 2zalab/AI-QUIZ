@@ -14,9 +14,14 @@ export function JoinForm() {
 
   useEffect(() => {
     fetch("/api/games", { cache: "no-store" })
-      .then((response) => response.json())
-      .then((payload) => setGames(payload.games ?? []))
-      .catch(() => setError("Impossible de charger les categories."));
+      .then(async (response) => {
+        const payload = await response.json();
+        if (!response.ok) throw new Error(payload.error ?? "Impossible de charger les categories.");
+        setGames(payload.games ?? []);
+      })
+      .catch((cause) =>
+        setError(cause instanceof Error ? cause.message : "Impossible de charger les categories."),
+      );
   }, []);
 
   // Le prenom saisi est conserve localement pour eviter de le retaper.
@@ -70,7 +75,7 @@ export function JoinForm() {
       <div>
         <p className="mb-2 text-sm font-semibold text-muted">Choisissez votre defi</p>
         <div className="grid gap-3">
-          {games.length === 0 && (
+          {games.length === 0 && !error && (
             <div className="card animate-pulse p-6 text-center text-sm text-faint">
               Chargement des categories...
             </div>

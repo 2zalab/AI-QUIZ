@@ -14,9 +14,9 @@ const EMPTY: LiveData = { entries: [], stats: null, connected: false };
 /**
  * Classement en direct.
  *
- * Le flux principal est un canal Server-Sent Events maintenu par le serveur : il
- * fonctionne aussi bien avec Supabase qu'en mode demonstration. Quand Supabase
- * Realtime est configure, on s'y abonne en plus pour declencher un
+ * Le flux principal est un canal Server-Sent Events maintenu par le serveur, qui
+ * pousse une mise a jour des qu'un score change. Quand la cle publique Supabase
+ * est renseignee, on s'abonne en plus a Supabase Realtime pour declencher un
  * rafraichissement immediat des qu'une ligne de la table players change.
  */
 export function useLeaderboard(): LiveData {

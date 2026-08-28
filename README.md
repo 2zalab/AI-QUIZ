@@ -15,7 +15,7 @@ met a jour en direct sur le grand ecran. **Aucune application a installer.**
 - [Les trois interfaces](#les-trois-interfaces)
 - [Categories et questions](#categories-et-questions)
 - [Systeme de score](#systeme-de-score)
-- [Demarrage rapide](#demarrage-rapide-mode-demonstration)
+- [Demarrage](#demarrage)
 - [Mise en place avec Supabase](#mise-en-place-avec-supabase)
 - [Deploiement](#deploiement-sur-vercel)
 - [Le jour de l'evenement](#le-jour-de-levenement)
@@ -124,13 +124,16 @@ elle disparait alors de la page de participation.
 
 ---
 
-## Demarrage rapide (mode demonstration)
+## Demarrage
 
-Sans aucune configuration, l'application tourne avec les CSV et une base en
-memoire — ideal pour tester ou pour un atelier hors ligne.
+Supabase est **obligatoire** : il n'existe pas de mode de repli. Une application
+qui parait fonctionner mais perd tous les scores au moindre redemarrage serait
+plus dangereuse qu'une erreur franche.
 
 ```bash
 npm install
+cp .env.example .env.local   # puis renseignez les cles Supabase
+npm run db:check             # verifie que le projet est pret
 npm run dev
 ```
 
@@ -138,10 +141,10 @@ Puis ouvrez :
 
 - l'ecran public : <http://localhost:3000/display>
 - l'interface joueur : <http://localhost:3000/join>
-- l'espace organisateur : <http://localhost:3000/admin> (mot de passe `iclan2026`)
+- l'espace organisateur : <http://localhost:3000/admin>
 
-> ⚠️ En mode demonstration, les parties sont perdues au redemarrage du serveur.
-> Pour un vrai evenement, configurez Supabase.
+Si les variables manquent, chaque page l'indique explicitement et nomme les
+variables absentes, plutot que d'afficher un jeu vide.
 
 Pour que les telephones du reseau wifi local atteignent le serveur, indiquez
 l'adresse IP de la machine :
@@ -214,9 +217,9 @@ deploiement voit reellement et le nombre de questions accessibles par categorie.
 
 | Ce que vous lisez | Ce que cela signifie |
 | --- | --- |
-| `"mode": "memory"` alors que Supabase est configure | les variables ne sont pas arrivees jusqu'a l'application : verifiez qu'elles sont bien dans **Vercel > Settings > Environment Variables** (et non dans le tableau de bord Supabase), pour l'environnement Production, puis **redeployez** |
-| `"mode": "supabase"` et `banks` a 0 | la table `questions` est vide : lancez `npm run db:import` depuis votre machine, puis `npm run db:check` |
-| `SUPABASE_SERVICE_ROLE_KEY: false` | la cle de service manque ; sans elle l'application bascule en mode demonstration |
+| `"configured": false` | les variables nommees dans `missing` ne sont pas arrivees jusqu'a l'application : verifiez qu'elles sont bien dans **Vercel > Settings > Environment Variables** (et non dans le tableau de bord Supabase), pour l'environnement Production, puis **redeployez** |
+| `SUPABASE_SERVICE_ROLE_KEY: false` | la cle de service manque : c'est elle qui autorise le serveur a lire les bonnes reponses. Sans elle, rien ne fonctionne |
+| `"configured": true` et `banks` a 0 | la table `questions` est vide : lancez `npm run db:import` depuis votre machine, puis `npm run db:check` |
 
 Rappel : les variables d'environnement ne s'appliquent qu'aux **nouveaux**
 deploiements. Apres les avoir ajoutees, relancez un deploiement.
@@ -299,10 +302,9 @@ src/
     ├── scoring.ts                  Calcul des points et bonus de rapidite
     ├── useLeaderboard.ts           Classement live (SSE + Supabase Realtime)
     └── store/
-        ├── index.ts                Interface commune et selection du mode
+        ├── index.ts                Interface commune, controle de configuration
         ├── supabase.ts             Implementation PostgreSQL
-        ├── memory.ts               Implementation en memoire (demonstration)
-        └── questions.ts            Lecture des CSV, tirage d'une partie
+        └── questions.ts            Tirage des questions d'une partie
 
 scripts/
 ├── qgen/                           Banques thematiques de questions (Python)
@@ -333,14 +335,15 @@ Deux mecanismes se completent :
 | Variable | Obligatoire | Role |
 | --- | --- | --- |
 | `NEXT_PUBLIC_APP_URL` | recommande | Adresse encodee dans le QR code |
-| `NEXT_PUBLIC_SUPABASE_URL` | pour Supabase | URL du projet |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | optionnel | Active Supabase Realtime cote client |
-| `SUPABASE_SERVICE_ROLE_KEY` | pour Supabase | Cle serveur — **ne jamais exposer au client** |
+| `NEXT_PUBLIC_SUPABASE_URL` | **oui** | URL du projet |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | recommande | Active Supabase Realtime cote client |
+| `SUPABASE_SERVICE_ROLE_KEY` | **oui** | Cle serveur — **ne jamais exposer au client** |
 | `ADMIN_PASSWORD` | recommande | Acces a `/admin` (defaut : `iclan2026`) |
 | `QUESTIONS_PER_SESSION` | non | Valeur initiale du nombre de questions par partie (defaut : 10). Une fois l'application lancee, le reglage se fait depuis `/admin` |
 
 Sans `NEXT_PUBLIC_SUPABASE_URL` **et** `SUPABASE_SERVICE_ROLE_KEY`, l'application
-bascule automatiquement en mode demonstration.
+refuse de servir les parties et affiche les variables manquantes sur chaque
+ecran. C'est volontaire : aucun repli silencieux.
 
 ---
 

@@ -1,3 +1,4 @@
+import { NextResponse } from "next/server";
 import { getStore } from "@/lib/store";
 
 export const dynamic = "force-dynamic";
@@ -12,7 +13,13 @@ const MAX_DURATION_MS = 55_000;
  * message que lorsqu'un score change. Le navigateur se reconnecte tout seul.
  */
 export async function GET() {
-  const store = await getStore();
+  let store;
+  try {
+    store = await getStore();
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Base de donnees indisponible.";
+    return NextResponse.json({ error: message }, { status: 503 });
+  }
   const encoder = new TextEncoder();
 
   const stream = new ReadableStream({

@@ -9,6 +9,9 @@ export interface Game {
   emoji: string;
   color: string;
   isActive: boolean;
+  /** Nombre de questions servies par partie, reglable depuis /admin. */
+  questionsPerSession: number;
+  /** Nombre de questions disponibles dans la banque pour cette categorie. */
   questionCount: number;
 }
 

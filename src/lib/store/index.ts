@@ -2,9 +2,16 @@ import type {
   AnswerResult, Game, LeaderboardEntry, Letter, PublicQuestion, SessionState, Stats,
 } from "../types";
 
+export interface GameSettings {
+  questionsPerSession?: number;
+  isActive?: boolean;
+}
+
 export interface Store {
   readonly mode: "supabase" | "memory";
   listGames(): Promise<Game[]>;
+  /** Applique un reglage de categorie depuis l'espace organisateur. */
+  updateGame(slug: string, settings: GameSettings): Promise<Game>;
   createSession(name: string, gameSlug: string): Promise<{ sessionCode: string }>;
   getState(sessionCode: string): Promise<SessionState | null>;
   serveQuestion(sessionCode: string): Promise<PublicQuestion | null>;

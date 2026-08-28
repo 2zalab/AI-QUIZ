@@ -1,11 +1,11 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
-import { GAMES, GAME_BY_SLUG } from "../config";
+import { GAMES, GAME_BY_SLUG, clampQuestionsPerSession } from "../config";
 import { computeScore, generateSessionCode, sanitizeName } from "../scoring";
 import type {
   AnswerResult, Difficulty, Game, LeaderboardEntry, Letter, PublicQuestion, SessionState, Stats,
 } from "../types";
-import type { Store } from "./index";
+import type { GameSettings, Store } from "./index";
 import { pickSessionQuestions } from "./questions";
 
 interface QuestionRow {
@@ -20,6 +20,33 @@ interface QuestionRow {
   points: number;
   time_limit: number;
   explanation: string;
+}
+
+interface GameRow {
+  id: string;
+  slug: string;
+  name: string;
+  description: string;
+  emoji: string;
+  color: string;
+  is_active: boolean;
+  questions_per_session: number;
+}
+
+/** Convertit une ligne de la table games en categorie exploitable par l'interface. */
+function toGame(row: GameRow, questionCount: number): Game {
+  const fallback = new Map(GAMES.map((game) => [game.slug, game]));
+  const base = fallback.get(row.slug);
+  return {
+    slug: row.slug,
+    name: row.name || base?.name || row.slug,
+    description: row.description || base?.description || "",
+    emoji: row.emoji || base?.emoji || "",
+    color: row.color || base?.color || "#f4b93e",
+    isActive: row.is_active,
+    questionsPerSession: row.questions_per_session,
+    questionCount,
+  };
 }
 
 /**
@@ -51,10 +78,24 @@ function toPublic(row: QuestionRow, index: number, total: number, servedAt: numb
 export function createSupabaseStore(): Store {
   const db = serviceClient();
 
-  async function gameIdBySlug(slug: string): Promise<string> {
-    const { data, error } = await db.from("games").select("id").eq("slug", slug).single();
-    if (error || !data) throw new Error(`Categorie introuvable : ${slug}`);
-    return data.id as string;
+  /** Categorie ouverte aux joueurs, avec son nombre de questions par partie. */
+  async function openGame(slug: string): Promise<{ id: string; perSession: number }> {
+    const { data, error } = await db
+      .from("games")
+      .select("id, is_active, questions_per_session")
+      .eq("slug", slug)
+      .maybeSingle();
+    const row = data as
+      | { id: string; is_active: boolean; questions_per_session: number }
+      | null;
+    if (error || !row) throw new Error(`Categorie introuvable : ${slug}`);
+    if (!row.is_active) throw new Error("Ce defi n'est plus propose. Choisissez-en un autre.");
+    return {
+      id: row.id,
+      perSession: clampQuestionsPerSession(
+        row.questions_per_session ?? GAME_BY_SLUG.get(slug)?.questionsPerSession ?? 10,
+      ),
+    };
   }
 
   async function playerByCode(sessionCode: string) {
@@ -113,36 +154,51 @@ export function createSupabaseStore(): Store {
     async listGames(): Promise<Game[]> {
       const { data } = await db
         .from("games")
-        .select("slug, name, description, emoji, color, is_active")
+        .select("id, slug, name, description, emoji, color, is_active, questions_per_session")
         .order("slug");
-      const rows = (data ?? []) as {
-        slug: string; name: string; description: string;
-        emoji: string; color: string; is_active: boolean;
-      }[];
+      const rows = (data ?? []) as GameRow[];
+
       const counts = new Map<string, number>();
       for (const row of rows) {
         const { count } = await db
           .from("questions")
           .select("id", { count: "exact", head: true })
-          .eq("game_id", await gameIdBySlug(row.slug));
+          .eq("game_id", row.id);
         counts.set(row.slug, count ?? 0);
       }
-      const fallback = new Map(GAMES.map((game) => [game.slug, game]));
-      return rows.map((row) => ({
-        slug: row.slug,
-        name: row.name || fallback.get(row.slug)?.name || row.slug,
-        description: row.description,
-        emoji: row.emoji || fallback.get(row.slug)?.emoji || "",
-        color: row.color,
-        isActive: row.is_active,
-        questionCount: counts.get(row.slug) ?? 0,
-      }));
+      return rows.map((row) => toGame(row, counts.get(row.slug) ?? 0));
+    },
+
+    async updateGame(slug, settings): Promise<Game> {
+      const patch: Record<string, unknown> = {};
+      if (settings.questionsPerSession !== undefined) {
+        patch.questions_per_session = clampQuestionsPerSession(settings.questionsPerSession);
+      }
+      if (settings.isActive !== undefined) patch.is_active = settings.isActive;
+
+      const query = Object.keys(patch).length
+        ? db.from("games").update(patch).eq("slug", slug)
+        : db.from("games").select().eq("slug", slug);
+
+      const { data, error } = await query
+        .select("id, slug, name, description, emoji, color, is_active, questions_per_session")
+        .single();
+      if (error || !data) {
+        throw new Error(`Reglage impossible pour ${slug}. ${error?.message ?? ""}`.trim());
+      }
+
+      const row = data as GameRow;
+      const { count } = await db
+        .from("questions")
+        .select("id", { count: "exact", head: true })
+        .eq("game_id", row.id);
+      return toGame(row, count ?? 0);
     },
 
     async createSession(rawName, gameSlug) {
       const name = sanitizeName(rawName);
       if (!name) throw new Error("Le nom du joueur est obligatoire.");
-      const gameId = await gameIdBySlug(gameSlug);
+      const { id: gameId, perSession } = await openGame(gameSlug);
 
       const { data: pool } = await db
         .from("questions")
@@ -152,30 +208,42 @@ export function createSupabaseStore(): Store {
       if (rows.length === 0) throw new Error("Aucune question disponible pour cette categorie.");
 
       let sessionCode = generateSessionCode();
-      let inserted = null;
+      let inserted: { id: string } | null = null;
+      let lastError: string | null = null;
+
       for (let attempt = 0; attempt < 5 && !inserted; attempt += 1) {
         const { data, error } = await db
           .from("players")
           .insert({ name, game_id: gameId, session_code: sessionCode })
           .select("id")
           .single();
-        if (error) {
-          sessionCode = generateSessionCode();
-          continue;
+        if (!error) {
+          inserted = data as { id: string };
+          break;
         }
-        inserted = data;
+        lastError = error.message;
+        // 23505 = collision sur session_code : on retente avec un autre code.
+        // Toute autre erreur est definitive, inutile d'insister.
+        if (error.code !== "23505") break;
+        sessionCode = generateSessionCode();
       }
-      if (!inserted) throw new Error("Impossible de creer la session de jeu.");
+      if (!inserted) {
+        throw new Error(`Impossible de creer la session de jeu. ${lastError ?? ""}`.trim());
+      }
 
-      const selection = pickSessionQuestions(rows);
+      const selection = pickSessionQuestions(rows, perSession);
       const { error: linkError } = await db.from("player_questions").insert(
         selection.map((question, index) => ({
-          player_id: inserted!.id as string,
+          player_id: inserted!.id,
           question_id: question.id,
           order_number: index + 1,
         })),
       );
-      if (linkError) throw new Error("Impossible de preparer les questions de la partie.");
+      if (linkError) {
+        // La partie serait injouable sans ses questions : on retire le joueur.
+        await db.from("players").delete().eq("id", inserted.id);
+        throw new Error(`Impossible de preparer les questions de la partie. ${linkError.message}`);
+      }
 
       return { sessionCode };
     },

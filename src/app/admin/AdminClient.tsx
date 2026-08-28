@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Leaderboard } from "@/components/Leaderboard";
 import { useLeaderboard } from "@/lib/useLeaderboard";
+import type { Game } from "@/lib/types";
 
 interface AppConfig {
   joinUrl: string;
@@ -157,9 +158,13 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
       </section>
 
       <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_22rem]">
-        <section>
-          <h2 className="mb-3 text-xl font-bold">Classement general</h2>
-          <Leaderboard entries={entries} compact />
+        <section className="space-y-8">
+          <GameSettingsPanel />
+
+          <div>
+            <h2 className="mb-3 text-xl font-bold">Classement general</h2>
+            <Leaderboard entries={entries} compact />
+          </div>
         </section>
 
         <aside className="space-y-5">
@@ -228,6 +233,153 @@ function Metric({ label, value, accent = false }: { label: string; value: number
         {value.toLocaleString("fr-FR")}
       </p>
       <p className="mt-1 text-xs uppercase tracking-widest text-muted">{label}</p>
+    </div>
+  );
+}
+
+/**
+ * Reglage des categories : nombre de questions servies par partie et
+ * activation. Les modifications s'appliquent aux parties lancees ensuite ;
+ * les parties deja en cours conservent leur nombre de questions initial.
+ */
+function GameSettingsPanel() {
+  const [games, setGames] = useState<Game[] | null>(null);
+  const [limits, setLimits] = useState({ min: 3, max: 50 });
+  const [drafts, setDrafts] = useState<Record<string, string>>({});
+  const [saving, setSaving] = useState<string | null>(null);
+  const [saved, setSaved] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch("/api/admin/games", { cache: "no-store" })
+      .then((response) => response.json())
+      .then((payload) => {
+        if (payload.games) {
+          setGames(payload.games);
+          setLimits(payload.limits ?? { min: 3, max: 50 });
+          setDrafts(
+            Object.fromEntries(
+              (payload.games as Game[]).map((game) => [game.slug, String(game.questionsPerSession)]),
+            ),
+          );
+        }
+      })
+      .catch(() => setError("Impossible de charger les categories."));
+  }, []);
+
+  async function save(slug: string, patch: { questionsPerSession?: number; isActive?: boolean }) {
+    setSaving(slug);
+    setError(null);
+    try {
+      const response = await fetch("/api/admin/games", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ slug, ...patch }),
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error ?? "Reglage impossible.");
+
+      const updated = payload.game as Game;
+      setGames((current) =>
+        (current ?? []).map((game) => (game.slug === slug ? updated : game)),
+      );
+      setDrafts((current) => ({ ...current, [slug]: String(updated.questionsPerSession) }));
+      setSaved(slug);
+      window.setTimeout(() => setSaved((value) => (value === slug ? null : value)), 2000);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Reglage impossible.");
+      // On restaure la valeur enregistree pour ne pas laisser un brouillon trompeur.
+      const known = games?.find((game) => game.slug === slug);
+      if (known) setDrafts((current) => ({ ...current, [slug]: String(known.questionsPerSession) }));
+    } finally {
+      setSaving(null);
+    }
+  }
+
+  function commit(game: Game) {
+    const raw = Number(drafts[game.slug]);
+    if (!Number.isFinite(raw) || raw === game.questionsPerSession) {
+      setDrafts((current) => ({ ...current, [game.slug]: String(game.questionsPerSession) }));
+      return;
+    }
+    void save(game.slug, { questionsPerSession: raw });
+  }
+
+  if (!games) {
+    return (
+      <div className="card animate-pulse p-6 text-sm text-faint">Chargement des categories...</div>
+    );
+  }
+
+  return (
+    <div>
+      <h2 className="mb-1 text-xl font-bold">Reglage des defis</h2>
+      <p className="mb-3 text-sm text-muted">
+        Nombre de questions servies par partie ({limits.min} a {limits.max}). La modification
+        s&apos;applique aux parties lancees ensuite ; celles deja en cours ne changent pas.
+      </p>
+
+      {error && (
+        <p role="alert" className="mb-3 rounded-xl border border-rose-500/40 bg-rose-500/10 px-4 py-2 text-sm text-rose-700 dark:text-rose-200">
+          {error}
+        </p>
+      )}
+
+      <ul className="space-y-2">
+        {games.map((game) => (
+          <li key={game.slug} className="card flex flex-wrap items-center gap-4 p-4">
+            <span className="text-2xl" aria-hidden>
+              {game.emoji}
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block font-bold">{game.name}</span>
+              <span className="block text-xs text-faint">
+                banque de {game.questionCount.toLocaleString("fr-FR")} questions
+              </span>
+            </span>
+
+            <label className="flex items-center gap-2 text-sm">
+              <span className="text-muted">Questions</span>
+              <input
+                type="number"
+                inputMode="numeric"
+                min={limits.min}
+                max={limits.max}
+                value={drafts[game.slug] ?? ""}
+                disabled={saving === game.slug}
+                onChange={(event) =>
+                  setDrafts((current) => ({ ...current, [game.slug]: event.target.value }))
+                }
+                onBlur={() => commit(game)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") event.currentTarget.blur();
+                }}
+                aria-label={`Nombre de questions par partie pour ${game.name}`}
+                className="w-20 rounded-lg border border-line bg-surface px-3 py-2 text-center font-bold tabular-nums text-fg outline-none focus:border-gold-500"
+              />
+            </label>
+
+            <button
+              type="button"
+              onClick={() => void save(game.slug, { isActive: !game.isActive })}
+              disabled={saving === game.slug}
+              className={[
+                "rounded-full border px-3 py-1.5 text-xs font-semibold transition",
+                game.isActive
+                  ? "border-emerald-500/50 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300"
+                  : "border-line text-faint hover:text-muted",
+              ].join(" ")}
+              aria-pressed={game.isActive}
+            >
+              {game.isActive ? "Proposee aux joueurs" : "Masquee"}
+            </button>
+
+            <span className="w-20 text-right text-xs text-emerald-700 dark:text-emerald-300">
+              {saved === game.slug ? "Enregistre" : saving === game.slug ? "..." : ""}
+            </span>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

@@ -1,10 +1,10 @@
-import { GAMES, GAME_BY_SLUG } from "../config";
+import { GAMES, GAME_BY_SLUG, clampQuestionsPerSession } from "../config";
 import { computeScore, generateSessionCode, sanitizeName } from "../scoring";
 import type {
   AnswerResult, Game, LeaderboardEntry, Letter, Player, PublicQuestion, Question,
   SessionState, Stats,
 } from "../types";
-import type { Store } from "./index";
+import type { GameSettings, Store } from "./index";
 import { loadQuestionsFromCsv, pickSessionQuestions } from "./questions";
 
 interface Session {
@@ -16,12 +16,16 @@ interface Session {
 
 interface MemoryState {
   sessions: Map<string, Session>;
+  /** Reglages de categorie definis depuis /admin (perdus au redemarrage). */
+  settings: Map<string, GameSettings>;
   version: number;
 }
 
 /** Etat conserve sur l'objet global pour survivre au rechargement a chaud de Next.js. */
 const globalRef = globalThis as unknown as { __iclanMemory?: MemoryState };
-const state: MemoryState = globalRef.__iclanMemory ?? { sessions: new Map(), version: 0 };
+const state: MemoryState =
+  globalRef.__iclanMemory ?? { sessions: new Map(), settings: new Map(), version: 0 };
+if (!state.settings) state.settings = new Map();
 globalRef.__iclanMemory = state;
 
 function bump() {
@@ -54,19 +58,55 @@ export function createMemoryStore(): Store {
 
     async listGames(): Promise<Game[]> {
       const pools = loadQuestionsFromCsv();
-      return GAMES.map((game) => ({
-        ...game,
-        questionCount: pools.get(game.slug)?.length ?? 0,
-      }));
+      return GAMES.map((game) => {
+        const settings = state.settings.get(game.slug) ?? {};
+        return {
+          ...game,
+          questionsPerSession: settings.questionsPerSession ?? game.questionsPerSession,
+          isActive: settings.isActive ?? game.isActive,
+          questionCount: pools.get(game.slug)?.length ?? 0,
+        };
+      });
+    },
+
+    async updateGame(slug, settings): Promise<Game> {
+      const base = GAME_BY_SLUG.get(slug);
+      if (!base) throw new Error("Categorie de jeu inconnue.");
+      const current = state.settings.get(slug) ?? {};
+      const next: GameSettings = { ...current };
+      if (settings.questionsPerSession !== undefined) {
+        next.questionsPerSession = clampQuestionsPerSession(settings.questionsPerSession);
+      }
+      if (settings.isActive !== undefined) next.isActive = settings.isActive;
+      state.settings.set(slug, next);
+      bump();
+
+      const pools = loadQuestionsFromCsv();
+      return {
+        ...base,
+        questionsPerSession: next.questionsPerSession ?? base.questionsPerSession,
+        isActive: next.isActive ?? base.isActive,
+        questionCount: pools.get(slug)?.length ?? 0,
+      };
     },
 
     async createSession(rawName, gameSlug) {
       const name = sanitizeName(rawName);
       if (!name) throw new Error("Le nom du joueur est obligatoire.");
-      if (!GAME_BY_SLUG.has(gameSlug)) throw new Error("Categorie de jeu inconnue.");
+
+      const game = GAME_BY_SLUG.get(gameSlug);
+      if (!game) throw new Error("Categorie de jeu inconnue.");
+      const configured = state.settings.get(gameSlug) ?? {};
+      if (!(configured.isActive ?? game.isActive)) {
+        throw new Error("Ce defi n'est plus propose. Choisissez-en un autre.");
+      }
 
       const pool = loadQuestionsFromCsv().get(gameSlug) ?? [];
       if (pool.length === 0) throw new Error("Aucune question disponible pour cette categorie.");
+
+      const perSession = clampQuestionsPerSession(
+        configured.questionsPerSession ?? game.questionsPerSession,
+      );
 
       let sessionCode = generateSessionCode();
       while (state.sessions.has(sessionCode)) sessionCode = generateSessionCode();
@@ -84,7 +124,7 @@ export function createMemoryStore(): Store {
           startedAt: Date.now(),
           finishedAt: null,
         },
-        questions: pickSessionQuestions(pool),
+        questions: pickSessionQuestions(pool, perSession),
         cursor: 0,
         servedAt: null,
       });

@@ -62,7 +62,7 @@ met a jour en direct sur le grand ecran. **Aucune application a installer.**
 | --- | --- | --- |
 | `/display` | Ecran de la salle | QR code d'acces, classement en direct, participation par defi, statuts des joueurs |
 | `/join` puis `/game/:code` | Participants | Saisie du nom, choix du defi, questions chronometrees, resultat final |
-| `/admin` | Organisateur | Statistiques, classement, lien et QR de participation, remise a zero entre deux manches |
+| `/admin` | Organisateur | Reglage du nombre de questions par defi, activation des categories, statistiques, classement, lien et QR de participation, remise a zero entre deux manches |
 
 Le theme choisi sur la page d'accueil s'applique partout (voir ci-dessous).
 
@@ -110,8 +110,15 @@ proportionnel au temps restant. Repondre juste en 5 secondes a une question
 « challenge » rapporte donc jusqu'a 450 points ; repondre juste au buzzer en
 rapporte 300. Une mauvaise reponse ou un temps ecoule rapporte 0.
 
-Chaque partie sert **10 questions** (4 faciles, 4 moyennes, 2 challenge),
-tirees au hasard et servies de la plus facile a la plus difficile.
+Chaque partie sert **10 questions par defaut** (4 faciles, 4 moyennes,
+2 challenge), tirees au hasard et servies de la plus facile a la plus difficile.
+
+Ce nombre se regle **categorie par categorie depuis `/admin`**, entre 3 et 50 :
+une manche courte de 5 questions pour un passage rapide, une finale de 20 pour
+departager. La repartition des difficultes est adaptee proportionnellement. Le
+reglage s'applique aux parties lancees ensuite ; celles deja en cours gardent
+leur nombre de questions initial. Chaque categorie peut aussi etre **masquee**,
+elle disparait alors de la page de participation.
 
 ---
 
@@ -252,7 +259,7 @@ src/
 │       ├── leaderboard/            Classement + statistiques
 │       ├── leaderboard/stream/     Flux Server-Sent Events du classement
 │       ├── qr/                     QR code SVG
-│       └── admin/                  Authentification et remise a zero
+│       └── admin/                  Authentification, reglage des defis, remise a zero
 ├── components/
 │   ├── Leaderboard.tsx
 │   └── ThemeToggle.tsx             Bascule clair / sombre (jetons CSS)
@@ -299,7 +306,7 @@ Deux mecanismes se completent :
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | optionnel | Active Supabase Realtime cote client |
 | `SUPABASE_SERVICE_ROLE_KEY` | pour Supabase | Cle serveur — **ne jamais exposer au client** |
 | `ADMIN_PASSWORD` | recommande | Acces a `/admin` (defaut : `iclan2026`) |
-| `QUESTIONS_PER_SESSION` | non | Nombre de questions par partie (defaut : 10) |
+| `QUESTIONS_PER_SESSION` | non | Valeur initiale du nombre de questions par partie (defaut : 10). Une fois l'application lancee, le reglage se fait depuis `/admin` |
 
 Sans `NEXT_PUBLIC_SUPABASE_URL` **et** `SUPABASE_SERVICE_ROLE_KEY`, l'application
 bascule automatiquement en mode demonstration.

@@ -125,9 +125,6 @@ export function JoinForm() {
         <button type="submit" className="btn-primary w-full text-lg" disabled={submitting}>
           {submitting ? "Preparation de la partie..." : "Commencer"}
         </button>
-        <p className="mt-3 text-center text-xs text-faint">
-          10 questions &middot; plus vous repondez vite, plus vous marquez de points.
-        </p>
       </div>
     </form>
   );

@@ -1,3 +1,4 @@
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { JoinForm } from "./JoinForm";
 
 export const dynamic = "force-dynamic";
@@ -5,6 +6,8 @@ export const dynamic = "force-dynamic";
 export default function JoinPage() {
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-xl flex-col px-5 py-10">
+      <ThemeToggle className="mb-6 self-start" />
+
       <header className="text-center">
         <p className="badge mx-auto w-fit bg-accent-soft text-accent">MIT Challenge</p>
         <h1 className="mt-4 text-3xl font-black leading-tight">

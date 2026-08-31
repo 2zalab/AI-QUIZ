@@ -1,8 +1,8 @@
 {
-  "name": "iclan-entrepreneur-challenge",
+  "name": "mit-entrepreneur-challenge",
   "version": "1.0.0",
   "private": true,
-  "description": "iCLAN Entrepreneur Challenge - Quiz web temps reel (QR code, Next.js, Supabase)",
+  "description": "MIT Entrepreneur Challenge - Quiz web temps reel (QR code, Next.js, Supabase)",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

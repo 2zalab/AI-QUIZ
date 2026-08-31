@@ -23,7 +23,7 @@ export function DisplayClient({ joinUrl }: { joinUrl: string }) {
         <div>
           <p className="badge bg-accent-soft text-accent">Business &middot; Innovation &middot; Cameroun</p>
           <h1 className="mt-2 text-4xl font-black leading-none xl:text-5xl">
-            <span className="title-shine">iCLAN Entrepreneur Challenge</span>
+            <span className="title-shine">MIT Entrepreneur Challenge</span>
           </h1>
         </div>
         <div className="text-right">

@@ -29,7 +29,7 @@ export default function HomePage() {
 
       <p className="badge w-fit bg-accent-soft text-accent">Business &middot; Innovation &middot; Cameroun</p>
       <h1 className="mt-5 text-5xl font-black leading-tight sm:text-6xl">
-        <span className="title-shine">iCLAN Entrepreneur Challenge</span>
+        <span className="title-shine">MIT Entrepreneur Challenge</span>
       </h1>
       <p className="mt-5 max-w-2xl text-lg text-muted">
         Un quiz de competition en temps reel. Les participants scannent un QR code, jouent depuis

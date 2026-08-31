@@ -7,3 +7,4 @@ l'etat final : ces fichiers sont alors inutiles.
 | Fichier | A executer si... |
 | --- | --- |
 | `001_questions_per_session_sans_plafond.sql` | vous avez cree la table `games` avec la contrainte `between 3 and 50` |
+| `002_renommage_mit.sql` | vous avez lance `seed_games.sql` avant le passage a la marque MIT |

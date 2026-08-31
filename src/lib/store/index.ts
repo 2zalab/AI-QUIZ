@@ -49,7 +49,7 @@ export async function getStore(): Promise<Store> {
   if (instance) return instance;
   const missing = missingSupabaseVars();
   if (missing.length > 0) {
-    console.error(`[iCLAN] Variables manquantes : ${missing.join(", ")}. ${MISSING_CONFIG_MESSAGE}`);
+    console.error(`[MIT] Variables manquantes : ${missing.join(", ")}. ${MISSING_CONFIG_MESSAGE}`);
     throw new Error(MISSING_CONFIG_MESSAGE);
   }
   const { createSupabaseStore } = await import("./supabase");

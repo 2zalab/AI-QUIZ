@@ -445,7 +445,7 @@ function GameSettingsPanel() {
                   if (event.key === "Enter") event.currentTarget.blur();
                 }}
                 aria-label={`Nombre de questions par partie pour ${game.name}`}
-                className="w-20 rounded-lg border border-line bg-surface px-3 py-2 text-center font-bold tabular-nums text-fg outline-none focus:border-gold-500"
+                className="w-20 rounded-lg border border-line bg-surface px-3 py-2 text-center font-bold tabular-nums text-fg outline-none focus:border-mit-500"
               />
             </label>
 

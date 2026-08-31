@@ -26,7 +26,7 @@ export function JoinForm() {
 
   // Le prenom saisi est conserve localement pour eviter de le retaper.
   useEffect(() => {
-    const stored = window.localStorage.getItem("iclan-name");
+    const stored = window.localStorage.getItem("mit-name");
     if (stored) setName(stored);
   }, []);
 
@@ -39,7 +39,7 @@ export function JoinForm() {
 
     setSubmitting(true);
     try {
-      window.localStorage.setItem("iclan-name", name.trim());
+      window.localStorage.setItem("mit-name", name.trim());
       const response = await fetch("/api/join", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -91,7 +91,7 @@ export function JoinForm() {
                 className={[
                   "card flex items-center gap-4 p-4 text-left transition",
                   active
-                    ? "border-gold-400 bg-accent-soft ring-2 ring-gold-400/40"
+                    ? "border-mit-400 bg-accent-soft ring-2 ring-mit-400/40"
                     : "hover:border-line-strong hover:bg-surface-hover",
                 ].join(" ")}
               >
@@ -103,7 +103,7 @@ export function JoinForm() {
                 <span
                   className={[
                     "flex h-6 w-6 shrink-0 items-center justify-center rounded-full border text-xs",
-                    active ? "border-gold-400 bg-gold-400 text-ink-950" : "border-line-strong",
+                    active ? "border-mit-400 bg-mit-400 text-ink-950" : "border-line-strong",
                   ].join(" ")}
                   aria-hidden
                 >

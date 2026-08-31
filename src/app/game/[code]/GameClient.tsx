@@ -144,7 +144,7 @@ export function GameClient({ sessionCode }: { sessionCode: string }) {
           className="timer-bar h-full rounded-full"
           style={{
             width: `${ratio * 100}%`,
-            backgroundColor: ratio > 0.5 ? "#22c8b0" : ratio > 0.25 ? "#f4b93e" : "#f43f5e",
+            backgroundColor: ratio > 0.5 ? "#2f80ed" : ratio > 0.25 ? "#f4b93e" : "#f43f5e",
           }}
         />
       </div>
@@ -164,7 +164,7 @@ export function GameClient({ sessionCode }: { sessionCode: string }) {
             else if (isChosen) tone = "border-rose-400 bg-rose-400/15";
             else tone = "border-line bg-surface-soft opacity-60";
           } else if (isChosen) {
-            tone = "border-gold-400 bg-accent-soft";
+            tone = "border-mit-400 bg-accent-soft";
           }
 
           return (

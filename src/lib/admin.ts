@@ -1,9 +1,9 @@
 import { cookies } from "next/headers";
 
-export const ADMIN_COOKIE = "iclan_admin";
+export const ADMIN_COOKIE = "mit_admin";
 
 /** Mot de passe de repli, utilise uniquement si ADMIN_PASSWORD n'est pas defini. */
-export const FALLBACK_PASSWORD = "iclan2026";
+export const FALLBACK_PASSWORD = "mit2026";
 
 /**
  * Mot de passe attendu.
@@ -47,7 +47,7 @@ export function passwordDiagnostics() {
 /** Jeton derive du mot de passe : il change des que le mot de passe change. */
 export function adminToken(): string {
   let hash = 5381;
-  const secret = `iclan|${adminPassword()}`;
+  const secret = `mit|${adminPassword()}`;
   for (let i = 0; i < secret.length; i += 1) {
     hash = ((hash << 5) + hash + secret.charCodeAt(i)) >>> 0;
   }

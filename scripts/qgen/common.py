@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Outils communs de generation des questions du iCLAN Entrepreneur Challenge.
+"""Outils communs de generation des questions du MIT Entrepreneur Challenge.
 
 Chaque question est decrite de facon compacte (enonce, bonne reponse, mauvaises
 reponses) puis transformee en ligne CSV : les options sont melangees de maniere

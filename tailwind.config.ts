@@ -34,10 +34,13 @@ const config: Config = {
           700: "#1d2649",
           600: "#2b3765",
         },
-        gold: {
-          400: "#ffd166",
-          500: "#f4b93e",
-          600: "#d9971a",
+        // Bleu MIT : couleur d'accent principale de l'application.
+        mit: {
+          300: "#a9cdff",
+          400: "#7ab5ff",
+          500: "#2f80ed",
+          600: "#1b5fc1",
+          700: "#14458f",
         },
         brand: {
           400: "#5eead4",

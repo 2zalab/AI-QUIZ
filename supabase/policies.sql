@@ -1,5 +1,5 @@
 -- =============================================================================
--- Politiques de securite (RLS) - iCLAN Entrepreneur Challenge
+-- Politiques de securite (RLS) - MIT Entrepreneur Challenge
 --
 -- Principe : le navigateur ne peut LIRE que le strict necessaire au classement
 -- (nom, score, statut). Les questions, les bonnes reponses et les reponses des

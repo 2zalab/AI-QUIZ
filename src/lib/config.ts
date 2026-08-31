@@ -43,7 +43,7 @@ export const GAMES: Game[] = [
     name: "Entrepreneuriat",
     description: "Business, marketing, financement, gestion et innovation.",
     emoji: "\u{1F4BC}",
-    color: "#f4b93e",
+    color: "#2f80ed",
     isActive: true,
     questionsPerSession: QUESTIONS_PER_SESSION,
     questionCount: 0,

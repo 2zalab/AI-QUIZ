@@ -24,14 +24,14 @@
   --line: rgba(15, 23, 42, 0.12);
   --line-strong: rgba(15, 23, 42, 0.22);
 
-  --accent: #a3700f;
-  --accent-soft: rgba(217, 151, 26, 0.16);
-  --accent-line: rgba(217, 151, 26, 0.5);
+  --accent: #14458f;
+  --accent-soft: rgba(47, 128, 237, 0.14);
+  --accent-line: rgba(47, 128, 237, 0.5);
 
   --shine-mid: #0b1024;
   --field-bg: rgba(255, 255, 255, 0.9);
 
-  --glow-gold: rgba(217, 151, 26, 0.16);
+  --glow-primary: rgba(47, 128, 237, 0.16);
   --glow-brand: rgba(18, 166, 149, 0.14);
   --glow-violet: rgba(139, 124, 246, 0.14);
 }
@@ -52,14 +52,14 @@
   --line: rgba(255, 255, 255, 0.12);
   --line-strong: rgba(255, 255, 255, 0.26);
 
-  --accent: #ffd166;
-  --accent-soft: rgba(255, 209, 102, 0.14);
-  --accent-line: rgba(255, 209, 102, 0.42);
+  --accent: #7ab5ff;
+  --accent-soft: rgba(122, 181, 255, 0.14);
+  --accent-line: rgba(122, 181, 255, 0.42);
 
   --shine-mid: #ffffff;
   --field-bg: rgba(11, 16, 36, 0.7);
 
-  --glow-gold: rgba(244, 185, 62, 0.16);
+  --glow-primary: rgba(47, 128, 237, 0.22);
   --glow-brand: rgba(34, 200, 176, 0.14);
   --glow-violet: rgba(139, 124, 246, 0.14);
 }
@@ -72,7 +72,7 @@ body {
 body {
   @apply bg-canvas text-fg antialiased;
   background-image:
-    radial-gradient(60rem 40rem at 12% -10%, var(--glow-gold), transparent 60%),
+    radial-gradient(60rem 40rem at 12% -10%, var(--glow-primary), transparent 60%),
     radial-gradient(50rem 34rem at 92% 4%, var(--glow-brand), transparent 62%),
     radial-gradient(46rem 30rem at 50% 108%, var(--glow-violet), transparent 60%);
   background-attachment: fixed;
@@ -90,7 +90,7 @@ body {
   }
 
   .btn-primary {
-    @apply btn bg-gradient-to-r from-gold-500 to-gold-400 text-ink-950 hover:brightness-110;
+    @apply btn bg-gradient-to-r from-mit-600 to-mit-500 text-white hover:brightness-110;
   }
 
   .btn-ghost {
@@ -99,7 +99,7 @@ body {
 
   .field {
     @apply w-full rounded-xl border border-line px-4 py-3 text-lg text-fg
-           outline-none transition focus:border-gold-500 focus:ring-2 focus:ring-gold-400/30;
+           outline-none transition focus:border-mit-500 focus:ring-2 focus:ring-mit-400/30;
     background-color: var(--field-bg);
   }
 
@@ -112,7 +112,7 @@ body {
   }
 
   .title-shine {
-    background: linear-gradient(90deg, #d9971a, var(--shine-mid), #12a695, #d9971a);
+    background: linear-gradient(90deg, #1b5fc1, var(--shine-mid), #2f80ed, #1b5fc1);
     background-size: 200% auto;
     -webkit-background-clip: text;
     background-clip: text;
@@ -122,7 +122,7 @@ body {
 }
 
 .dark .title-shine {
-  background-image: linear-gradient(90deg, #ffd166, var(--shine-mid), #5eead4, #ffd166);
+  background-image: linear-gradient(90deg, #7ab5ff, var(--shine-mid), #a9cdff, #7ab5ff);
 }
 
 /* Barre de temps du joueur */

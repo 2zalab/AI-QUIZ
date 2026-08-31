@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "iCLAN Entrepreneur Challenge",
+  title: "MIT Entrepreneur Challenge",
   description:
     "Quiz web temps reel : business, innovation et culture camerounaise. Scannez le QR code et jouez depuis votre navigateur.",
 };
@@ -24,7 +24,7 @@ export const viewport: Viewport = {
 const THEME_SCRIPT = `
 (function () {
   try {
-    var stored = localStorage.getItem("iclan-theme");
+    var stored = localStorage.getItem("mit-theme");
     var dark = stored ? stored === "dark" : true;
     document.documentElement.classList.toggle("dark", dark);
     document.documentElement.style.colorScheme = dark ? "dark" : "light";

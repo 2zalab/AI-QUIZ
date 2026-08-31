@@ -42,7 +42,7 @@ function toGame(row: GameRow, questionCount: number): Game {
     name: row.name || base?.name || row.slug,
     description: row.description || base?.description || "",
     emoji: row.emoji || base?.emoji || "",
-    color: row.color || base?.color || "#f4b93e",
+    color: row.color || base?.color || "#2f80ed",
     isActive: row.is_active,
     questionsPerSession: row.questions_per_session,
     questionCount,
@@ -214,7 +214,7 @@ export function createSupabaseStore(): Store {
         // Cas typique d'un projet Supabase dont le schema est en place mais dont
         // la banque n'a jamais ete alimentee.
         console.error(
-          `[iCLAN] La table questions est vide pour la categorie "${gameSlug}". ` +
+          `[MIT] La table questions est vide pour la categorie "${gameSlug}". ` +
             "Lancez `npm run db:import` avec les variables Supabase du projet.",
         );
         throw new Error(

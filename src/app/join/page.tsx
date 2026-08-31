@@ -6,7 +6,7 @@ export default function JoinPage() {
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-xl flex-col px-5 py-10">
       <header className="text-center">
-        <p className="badge mx-auto w-fit bg-brand-400/15 text-brand-600 dark:text-brand-400">iCLAN Challenge</p>
+        <p className="badge mx-auto w-fit bg-accent-soft text-accent">MIT Challenge</p>
         <h1 className="mt-4 text-3xl font-black leading-tight">
           <span className="title-shine">Bienvenue au defi</span>
         </h1>

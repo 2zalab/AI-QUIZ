@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Genere les fichiers CSV de questions du iCLAN Entrepreneur Challenge.
+"""Genere les fichiers CSV de questions du MIT Entrepreneur Challenge.
 
 Usage :
     python3 scripts/generate_questions.py [--out data]

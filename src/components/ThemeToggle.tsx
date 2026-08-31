@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 
 export type Theme = "light" | "dark";
 
-export const THEME_KEY = "iclan-theme";
+export const THEME_KEY = "mit-theme";
 
 function apply(theme: Theme) {
   document.documentElement.classList.toggle("dark", theme === "dark");
@@ -51,7 +51,7 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
         "group inline-flex items-center gap-2 rounded-full border border-line bg-surface",
         "px-3 py-1.5 text-xs font-semibold text-muted backdrop-blur-sm transition",
         "hover:border-accent-line hover:bg-surface-hover hover:text-accent",
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400/40",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mit-400/40",
         className,
       ].join(" ")}
     >

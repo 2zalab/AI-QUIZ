@@ -1,4 +1,4 @@
-# 🏆 iCLAN Entrepreneur Challenge
+# 🏆 MIT Entrepreneur Challenge
 
 Quiz de competition **temps reel**, joue directement dans le navigateur du
 telephone. L'organisateur projette un ecran avec un QR code, les participants
@@ -338,7 +338,7 @@ Deux mecanismes se completent :
 | `NEXT_PUBLIC_SUPABASE_URL` | **oui** | URL du projet |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | recommande | Active Supabase Realtime cote client |
 | `SUPABASE_SERVICE_ROLE_KEY` | **oui** | Cle serveur — **ne jamais exposer au client** |
-| `ADMIN_PASSWORD` | recommande | Acces a `/admin` (defaut : `iclan2026`) |
+| `ADMIN_PASSWORD` | recommande | Acces a `/admin` (defaut : `mit2026`) |
 | `QUESTIONS_PER_SESSION` | non | Valeur initiale du nombre de questions par partie (defaut : 10). Une fois l'application lancee, le reglage se fait depuis `/admin` |
 
 Sans `NEXT_PUBLIC_SUPABASE_URL` **et** `SUPABASE_SERVICE_ROLE_KEY`, l'application

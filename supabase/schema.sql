@@ -1,5 +1,5 @@
 -- =============================================================================
--- iCLAN Entrepreneur Challenge - schema Supabase / PostgreSQL
+-- MIT Entrepreneur Challenge - schema Supabase / PostgreSQL
 -- A executer dans l'editeur SQL de Supabase (ou via `supabase db push`).
 -- =============================================================================
 
@@ -33,7 +33,7 @@ create table if not exists games (
   name                  text        not null,
   description           text        not null default '',
   emoji                 text        not null default '',
-  color                 text        not null default '#f4b93e',
+  color                 text        not null default '#2f80ed',
   -- Pas de plafond arbitraire : le nombre de questions par partie est borne a
   -- l'execution par la taille de la banque de la categorie.
   questions_per_session integer     not null default 10 check (questions_per_session > 0),

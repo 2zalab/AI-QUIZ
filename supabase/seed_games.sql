@@ -4,13 +4,13 @@
 -- =============================================================================
 
 insert into events (name, description, status)
-select 'iCLAN Entrepreneur Challenge', 'Business, innovation et culture camerounaise', 'open'
+select 'MIT Entrepreneur Challenge', 'Business, innovation et culture camerounaise', 'open'
 where not exists (select 1 from events);
 
 insert into games (event_id, slug, name, description, emoji, color, questions_per_session)
 values
   ((select id from events order by created_at limit 1), 'entrepreneuriat', 'Entrepreneuriat',
-   'Business, marketing, financement, gestion et innovation.', '💼', '#f4b93e', 10),
+   'Business, marketing, financement, gestion et innovation.', '💼', '#2f80ed', 10),
   ((select id from events order by created_at limit 1), 'cameroun', 'Cameroun',
    'Culture, histoire, geographie, economie et personnalites.', '🇨🇲', '#22c8b0', 10),
   ((select id from events order by created_at limit 1), 'innovation-ia', 'Innovation & IA',

@@ -18,16 +18,16 @@ interface PasswordConfig {
 function configHint(config: PasswordConfig | null): string | null {
   if (!config) return null;
   if (config.looksLikeAssignment) {
-    return "La variable contient la ligne entiere « ADMIN_PASSWORD=... ». Dans le champ Value de votre hebergeur, ne mettez que le mot de passe, sans le nom de la variable ni le signe egal.";
+    return "Le mot de passe enregistre contient un nom de reglage suivi d'un signe egal. Cote hebergeur, le champ de valeur doit contenir le mot de passe seul.";
   }
   if (config.hasSurroundingQuotes) {
-    return "La variable est entouree de guillemets. Retirez-les : la valeur doit etre le mot de passe seul.";
+    return "Le mot de passe enregistre est entoure de guillemets. Retirez-les : la valeur doit etre le mot de passe seul.";
   }
   if (config.hasWhitespaceEdges) {
-    return "La variable contient un espace ou un retour a la ligne en debut ou en fin. Il est ignore par l'application, mais verifiez la valeur enregistree.";
+    return "Le mot de passe enregistre commence ou se termine par un espace. Il est ignore ici, mais verifiez la valeur cote hebergeur.";
   }
   if (config.usingFallback) {
-    return "La variable ADMIN_PASSWORD n'est pas visible par l'application : soit elle n'a pas ete enregistree pour cet environnement, soit le projet n'a pas ete redeploye depuis. Le mot de passe de repli est actuellement actif.";
+    return "Aucun mot de passe n'a ete enregistre pour cet environnement, ou le projet n'a pas ete redeploye depuis son enregistrement. Un mot de passe de repli est actuellement actif.";
   }
   return null;
 }
@@ -86,12 +86,13 @@ export function AdminClient() {
       <main className="mx-auto flex min-h-screen max-w-sm flex-col justify-center px-6">
         <h1 className="text-2xl font-black">Espace organisateur</h1>
         <p className="mt-2 text-sm text-muted">
-          Saisissez le mot de passe defini dans la variable ADMIN_PASSWORD.
+          Acces reserve a l&apos;organisateur de l&apos;evenement. Saisissez le mot de passe qui vous
+          a ete communique.
           {config?.usingFallback && (
             <>
               {" "}
               <span className="text-amber-700 dark:text-amber-300">
-                Cette variable n&apos;est pas encore active sur ce deploiement.
+                Le mot de passe n&apos;est pas encore configure sur ce deploiement.
               </span>
             </>
           )}
